@@ -29,5 +29,6 @@ jobs:
         with:
           folder: docs/.vuepress/dist # 指定 VuePress 构建输出目录
           token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: docs/.vuepress/dist # 将构建产物输出到 main 分支根目录
           # branch: gh-pages # 注释掉分支配置，因为用户/组织页面直接部署到仓库根目录
           clean: true # 添加 clean: true 选项以清除之前的部署
