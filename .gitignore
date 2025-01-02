@@ -1,0 +1,40 @@
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+ehthumbs.db
+
+# Logs and temp files
+*.log
+*.tmp
+*.swp
+*.bak
+*.cache
+
+# IDE specific
+.idea/
+.vscode/
+
+# Compiled output
+dist/
+build/
+target/
+
+# Personal/sensitive files
+.env
+.env.*
+credentials.json
+secret.key
+
+# VuePress Specific
+*/.vuepress/dist/
+*/.vuepress/cache/
+*/.vuepress/.temp/
