@@ -1,0 +1,32 @@
+name: VuePress Deploy
+
+on:
+  push:
+    branches:
+      - main # 根据你的主分支修改
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22" # 根据你的 Node.js 版本修改
+
+      - name: Install dependencies
+        run: npm install # 或 yarn install
+
+      - name: Build VuePress site
+        run: npm run docs:build # 或 yarn docs:build
+
+      - name: Deploy to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: docs/.vuepress/dist # 指定 VuePress 构建输出目录
+          # branch: gh-pages # 注释掉分支配置，因为用户/组织页面直接部署到仓库根目录
+          clean: true # 添加 clean: true 选项以清除之前的部署
