@@ -22,7 +22,7 @@ jobs:
         run: npm install # 或 yarn install
 
       - name: Build VuePress site
-        run: npm run docs:build # 或 yarn docs:build
+        run: npm run build # 或 yarn docs:build
 
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
