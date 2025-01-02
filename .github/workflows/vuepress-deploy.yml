@@ -27,6 +27,7 @@ jobs:
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4
         with:
+          folder: docs/.vuepress/dist # vuepress 生成的静态文件存放的地方
           token: ${{ secrets.GITHUB_TOKEN }}
           target-branch: gh-pages # 部署到 gh-pages 分支， gh-pages 分支则用来存放生成的静态文件
           build_dir: docs/.vuepress/dist # vuepress 生成的静态文件存放的地方
