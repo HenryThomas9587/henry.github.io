@@ -5,7 +5,7 @@ import { join } from "path";
 
 export default defineUserConfig({
   title: "My Documentation Site",
-  base: "/henry.github.io/", // 修改这里
+  base: "/app/", // 修改这里
   description: "VuePress Starter Project",
 
   bundler: viteBundler({
