@@ -1,18 +1,15 @@
-import { defineThemeConfig } from 'vuepress-theme-plume'
-import { enNavbar, zhNavbar } from './navbar'
-import { enNotes, zhNotes } from './notes'
-
+import { defineThemeConfig } from "vuepress-theme-plume";
+import { enNavbar, zhNavbar } from "./navbar";
+import { enNotes, zhNotes } from "./notes";
 /**
  * @see https://theme-plume.vuejs.press/config/basic/
  */
 export default defineThemeConfig({
-  logo: 'https://theme-plume.vuejs.press/plume.png',
+  logo: "https://theme-plume.vuejs.press/plume.png",
 
-  appearance: true,  // 配置 深色模式
+  appearance: true, // 配置 深色模式
 
-  social: [
-    { icon: 'github', link: '/' },
-  ],
+  social: [{ icon: "github", link: "/" }],
   // navbarSocialInclude: ['github'], // 允许显示在导航栏的 social 社交链接
   // aside: true, // 页内侧边栏， 默认显示在右侧
   // outline: [2, 3], // 页内大纲， 默认显示 h2, h3
@@ -41,14 +38,14 @@ export default defineThemeConfig({
   // },
 
   locales: {
-    '/': {
+    "/": {
       /**
        * @see https://theme-plume.vuejs.press/config/basic/#profile
        */
       profile: {
-        avatar: 'https://theme-plume.vuejs.press/plume.png',
-        name: 'My Vuepress Site',
-        description: '',
+        avatar: "https://theme-plume.vuejs.press/plume.png",
+        name: "My Vuepress Site",
+        description: "",
         // circle: true,
         // location: '',
         // organization: '',
@@ -61,21 +58,21 @@ export default defineThemeConfig({
        * 公告板
        * @see https://theme-plume.vuejs.press/guide/features/bulletin/
        */
-       // bulletin: {
-       //   layout: 'top-right',
-       //   contentType: 'markdown',
-       //   title: '',
-       //   content: '',
-       // },
+      // bulletin: {
+      //   layout: 'top-right',
+      //   contentType: 'markdown',
+      //   title: '',
+      //   content: '',
+      // },
     },
-    '/en/': {
+    "/en/": {
       /**
        * @see https://theme-plume.vuejs.press/config/basic/#profile
        */
       profile: {
-        avatar: 'https://theme-plume.vuejs.press/plume.png',
-        name: 'My Vuepress Site',
-        description: '',
+        avatar: "https://theme-plume.vuejs.press/plume.png",
+        name: "My Vuepress Site",
+        description: "",
         // circle: true,
         // location: '',
         // organization: '',
@@ -88,12 +85,12 @@ export default defineThemeConfig({
        * 公告板
        * @see https://theme-plume.vuejs.press/guide/features/bulletin/
        */
-       // bulletin: {
-       //   layout: 'top-right',
-       //   contentType: 'markdown',
-       //   title: '',
-       //   content: '',
-       // },
+      // bulletin: {
+      //   layout: 'top-right',
+      //   contentType: 'markdown',
+      //   title: '',
+      //   content: '',
+      // },
     },
   },
-})
+});
