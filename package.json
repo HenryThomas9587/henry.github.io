@@ -1,24 +1,27 @@
 {
-  "name": "henry.github.io",
+  "name": "my-vuepress-site",
+  "type": "module",
   "version": "1.0.0",
-  "description": "文档",
-  "scripts": {
-    "dev": "vuepress dev docs",
-    "build": "vuepress build docs",
-    "deploy": "npm run build && git add docs/.vuepress/dist && git commit -m 'Deploy docs' && git subtree push --prefix docs/.vuepress/dist origin gh-pages",
-    "ts-check": "tsc --noEmit"
+  "description": "",
+  "author": "Henry Thomas <henrythomas9587@gmail.com>",
+  "license": "MIT",
+  "engines": {
+    "node": "^18.20.0 || >=20.0.0"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "scripts": {
+    "docs:dev": "vuepress dev docs",
+    "docs:dev-clean": "vuepress dev docs --clean-cache --clean-temp",
+    "docs:build": "vuepress build docs --clean-cache --clean-temp",
+    "docs:preview": "http-server docs/.vuepress/dist",
+    "vp-update": "npx vp-update"
+  },
   "devDependencies": {
-    "@types/node": "^22.10.3",
-    "@vuepress/bundler-vite": "^2.0.0-rc.19",
-    "@vuepress/core": "^2.0.0-rc.19",
-    "@vuepress/theme-default": "^2.0.0-rc.19",
-    "typescript": "^5.7.2",
+    "@vuepress/bundler-vite": "2.0.0-rc.19",
+    "vuepress": "2.0.0-rc.19",
+    "vuepress-theme-plume": "1.0.0-rc.125",
+    "http-server": "^14.1.1",
     "vue": "^3.5.13",
-    "vuepress": "^2.0.0-rc.19",
-    "sass": "^1.82.0"
+    "sass-embedded": "^1.83.0",
+    "typescript": "^5.7.2"
   }
 }
