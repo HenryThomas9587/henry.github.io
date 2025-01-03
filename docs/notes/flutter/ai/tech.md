@@ -4,236 +4,427 @@ createTime: 2025/01/03 23:01:35
 permalink: /flutter/ai/tech/
 ---
 
-## 身份介绍
+## 身份与技能
 
-您是一位精通 Flutter、Dart、Riverpod、Freezed、Flutter Hooks 和 Supabase 的专家。
+- 精通 Flutter、Dart、Dio、GoRouter 、Riverpod、Freezed、Supabase。
 
-## 关键原则
+## 核心原则
 
-- 编写简洁的技术性 Dart 代码，并提供准确的示例。
-- 在适当的情况下使用函数式和声明式编程模式。
-- 优先使用组合而非继承。
-- 使用描述性变量名和助动词（例如，isLoading、hasError）。
-- 文件结构：导出的 widget、子 widget、辅助函数、静态内容、类型。
-- **导入规则：使用包名而非相对路径**
-- 严格遵循 `very_good_analysis` 提供的代码规范
+- 编写简洁、清晰的 Dart 代码。
+- 优先使用组合而非继承；函数式优先于命令式。
+- 文件结构：**widget > 子 widget > 辅助函数 > 静态内容 > 类型**。
+- 导入规则：使用包名路径 (`package:`)，分组导入。
 
-## Dart/Flutter
+## 代码规范
 
-- 对不可变 widget 使用 const 构造函数。
-- 利用 Freezed 处理不可变状态类和联合类型。
-- 对简单函数和方法使用箭头语法。
-- 对单行 getter 和 setter 优先使用表达式体。
-- 使用尾随逗号以获得更好的格式和差异对比。
-- 使用 `dart format` 格式化代码。
-- 使用 `dart analyze` 分析代码。
-- 使用 `dart fix` 修复语法问题。
-- 使用 `dart pub run build_runner build` 生成代码。
-- 使用 `dart pub run build_runner watch` 监听代码变化并自动生成代码。
+### 1. 代码风格
 
-## 错误处理和验证
+- 不可变 widget 使用 `const` 构造函数。
+- 简单函数和方法使用箭头语法。
+- 对 getter 和 setter 使用单行表达式体。
+- 使用尾逗号提升代码可读性。
+- 保持每行代码不超过 80 个字符。
 
-- 在视图中使用 SelectableText.rich 而非 SnackBars 实现错误处理。
-- 使用 SelectableText.rich 并以红色显示错误以提高可见性。
-- 在显示错误的屏幕内处理空状态。
-- 使用 AsyncValue 正确处理错误和加载状态。
+### 2.导入规则
 
-## Riverpod 特定指南
+#### 2.1 导入顺序
 
-- 使用 @riverpod 注解生成 provider。
-- 优先使用 AsyncNotifierProvider 和 NotifierProvider 而非 StateProvider。
-- 避免使用 StateProvider、StateNotifierProvider 和 ChangeNotifierProvider。
-- 使用 ref.invalidate() 手动触发 provider 更新。
-- 在 widget 被销毁时正确取消异步操作。
+- Dart SDK 导入。
+- 第三方库导入。
+- 项目内部导入。
 
-## getIt 特定指南
+  示例：
 
-- 优先使用 `get_it` 进行服务定位和依赖注入。
-- 在 `main.dart` 中注册你的依赖项。
-- 使用 `locator.registerLazySingleton()` 注册只需创建一次的依赖项。
-- 使用 `locator.registerFactory()` 注册每次请求都需要新实例的依赖项。
-- 避免在 widget 树的深层传递 `get_it` 实例。
-- 考虑使用抽象类或接口来定义你的服务，以便更容易进行测试和替换实现。
+  ```dart
+  import 'dart:async';
+
+  import 'package:flutter/material.dart';
+  import 'package:riverpod/riverpod.dart';
+
+  import 'package:my_app/core/constants.dart';
+  import 'package:my_app/features/user/user_provider.dart';
+  ```
+
+#### 2.2 使用 `as` 创建别名避免冲突
+
+#### 2.3 使用 `show` 或 `hide` 限制导入内容
+
+### 3. 错误处理
+
+- 使用 `SelectableText.rich` 显示错误，避免 SnackBars。
+- 使用 `AsyncValue` 处理加载和错误状态。
+- 在视图中处理空状态，提供用户友好的反馈。
+
+### 4.类型约束
+
+#### 4.1 明确类型声明
+
+- 避免使用 `var`，除非类型显而易见。
+- 示例：
+
+  ```dart
+  final String name = 'Flutter';
+  final int count = 10;
+  ```
+
+#### 4.2 集合类型
+
+- 显式指定集合类型。
+- 示例：
+
+  ```dart
+  final List<String> names = ['Alice', 'Bob'];
+  final Map<String, int> scores = {'Alice': 100, 'Bob': 90};
+  ```
+
+#### 4.3 空安全
+
+- 明确区分可空类型和不可空类型。
+- 示例：
+
+  ```dart
+  String? nullableString;
+  String nonNullableString = '';
+  ```
 
 ## 性能优化
 
-- 尽可能使用 const widget 以优化重建。
-- 实现列表视图优化（例如，ListView.builder）。
-- 对静态图像使用 AssetImage，对远程图像使用 cached_network_image。
-- 对 Supabase 操作实现正确的错误处理，包括网络错误。
-
-## 关键约定
-
-1. 使用 GoRouter 进行导航和深度链接。
-2. 针对 Flutter 性能指标（首次有效绘制、可交互时间）进行优化。
-3. 优先使用无状态 widget：
+1. 尽可能使用 `const` 优化重建。
+2. 列表优化：使用 `ListView.builder`。
+3. 静态图片使用 `AssetImage`，远程图片使用 `cached_network_image`。
+4. 针对 Flutter 性能指标（首次有效绘制、可交互时间）进行优化。
+5. 优先使用无状态 widget：
    - 对依赖状态的 widget 使用 ConsumerWidget 与 Riverpod 结合。
-   - 当结合 Riverpod 和 Flutter Hooks 时，使用 HookConsumerWidget。
+6. 在异步操作中正确释放资源，避免泄漏。
+
+## 存储与数据管理
+
+1. **本地存储**
+
+   - 优先使用 `hive` 管理轻量级数据。
+   - 对于更复杂的本地数据库操作，使用 `drift` 库。
+   - 避免在 `shared_preferences` 中存储大型或敏感数据。
+
+2. **数据加密**
+
+   - 对敏感数据使用加密存储，如 `flutter_secure_storage`。
+   - 存储前对密码或令牌等信息进行哈希处理（推荐使用 `bcrypt` 或 `Argon2` 算法）。
+
+3. **文件存储**
+
+   - 使用 `path_provider` 获取平台独立的存储目录。
+   - 存储大文件时，优先选择缓存目录（`getTemporaryDirectory`），避免占用持久存储。
+   - 定期清理临时文件夹以节省空间。
+
+4. **云存储**
+
+   - 对云存储（如 Supabase、Firebase）的访问，封装到独立的存储服务类中，便于测试和维护。
+   - 上传文件时，显示进度条并处理可能的网络错误。
+
+5. **缓存管理**
+
+   - 使用适当的缓存策略：例如 `dio_cache_interceptor`。
+   - 设置缓存的最大大小和过期时间。
+   - 提供清理缓存的功能，供用户或应用程序定期调用。
+
+6. **最佳实践**
+   - 避免直接暴露存储服务，通过 Repository 模式抽象存储层。
+   - 将存储操作放在后台线程中执行，以免阻塞 UI。
+   - 在应用启动时，检查存储权限并正确处理权限被拒绝的情况。
+
+## 架构和工具
+
+### GoRouter
+
+#### 1. 路由定义
+
+- 使用语义化路径，路径应简洁明了。
+- 使用 `name` 属性定义命名路由，便于管理和跳转。
+
+##### 示例 1
+
+```dart
+final GoRouter router = GoRouter(
+  initialLocation: '/home',
+  routes: [
+    GoRoute(
+      name: 'home',
+      path: '/home',
+      builder: (context, state) => const HomePage(),
+    ),
+    GoRoute(
+      name: 'details',
+      path: '/details/:id',
+      builder: (context, state) {
+        final id = state.params['id']!;
+        return DetailsPage(id: id);
+      },
+    ),
+  ],
+);
+```
+
+#### 2. 动态参数
+
+- 使用 `state.params` 获取路径参数，`state.queryParams` 获取查询参数。
+- 参数验证应在页面层实现。
+
+##### 示例 2
+
+```dart
+GoRoute(
+  path: '/profile/:username',
+  builder: (context, state) {
+    final username = state.params['username']!;
+    final age = state.queryParams['age'];
+    return ProfilePage(username: username, age: age);
+  },
+);
+```
+
+#### 3. 嵌套路由
+
+- 使用嵌套路由管理层级页面导航。
+- 路径设计应避免过深的嵌套。
+
+##### 示例 3
+
+```dart
+GoRoute(
+  path: '/dashboard',
+  builder: (context, state) => const DashboardPage(),
+  routes: [
+    GoRoute(
+      path: 'settings',
+      builder: (context, state) => const SettingsPage(),
+    ),
+    GoRoute(
+      path: 'profile',
+      builder: (context, state) => const ProfilePage(),
+    ),
+  ],
+);
+```
+
+#### 4. 路由守卫
+
+- 使用 `redirect` 属性实现访问控制。
+- 可根据登录状态或其他条件跳转到特定页面。
+
+##### 示例 4
+
+```dart
+final GoRouter router = GoRouter(
+  redirect: (context, state) {
+    final isLoggedIn = AuthService().isLoggedIn;
+    if (!isLoggedIn && state.location != '/login') {
+      return '/login';
+    }
+    return null;
+  },
+  routes: [
+    GoRoute(
+      path: '/login',
+      builder: (context, state) => const LoginPage(),
+    ),
+    GoRoute(
+      path: '/home',
+      builder: (context, state) => const HomePage(),
+    ),
+  ],
+);
+```
+
+#### 5. 错误页面
+
+- 配置 `errorBuilder` 属性处理导航错误或未知路径。
+- 提供统一的错误页面设计，提升用户体验。
+
+##### 示例 5
+
+```dart
+final GoRouter router = GoRouter(
+  errorBuilder: (context, state) => const ErrorPage(),
+  routes: [
+    GoRoute(
+      path: '/home',
+      builder: (context, state) => const HomePage(),
+    ),
+  ],
+);
+```
+
+#### 6. 动态导航栏
+
+- 使用 `ShellRoute` 结合 `BottomNavigationBar` 实现动态页面切换。
+
+##### 示例 6
+
+```dart
+final GoRouter router = GoRouter(
+  routes: [
+    ShellRoute(
+      builder: (context, state, child) {
+        return Scaffold(
+          body: child,
+          bottomNavigationBar: BottomNavigationBar(
+            currentIndex: _getIndex(state.location),
+            onTap: (index) {
+              switch (index) {
+                case 0:
+                  router.go('/home');
+                  break;
+                case 1:
+                  router.go('/profile');
+                  break;
+              }
+            },
+            items: const [
+              BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+              BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
+            ],
+          ),
+        );
+      },
+      routes: [
+        GoRoute(
+          path: '/home',
+          builder: (context, state) => const HomePage(),
+        ),
+        GoRoute(
+          path: '/profile',
+          builder: (context, state) => const ProfilePage(),
+        ),
+      ],
+    ),
+  ],
+);
+
+int _getIndex(String location) {
+  if (location.startsWith('/home')) return 0;
+  if (location.startsWith('/profile')) return 1;
+  return 0;
+}
+```
+
+#### 7. 跳转与导航
+
+- 使用 `go` 或 `goNamed` 方法进行页面跳转。
+- 返回上一页时使用 `pop` 方法。
+
+##### 示例 7
+
+```dart
+// 跳转到指定路径
+router.go('/details/123');
+
+// 使用命名路由跳转
+router.goNamed('details', params: {'id': '123'});
+
+// 返回上一页
+router.pop();
+```
+
+### Riverpod
+
+1. 使用 `@riverpod` 注解生成 provider。
+2. 优先使用 `AsyncNotifierProvider` 和 `NotifierProvider`。
+3. 避免使用 `StateProvider`、`ChangeNotifierProvider` 等旧模式。
+4. 使用 `ref.invalidate()` 手动触发 provider 更新。
+
+### Dio
+
+#### 1. 配置
+
+- 使用单例模式创建 `Dio` 实例。
+- 配置基础 URL 和超时时间。
+- 添加日志拦截器处理请求和响应。
+
+  ```dart
+  final dio = Dio(BaseOptions(
+    baseUrl: 'https://api.example.com',
+    connectTimeout: const Duration(seconds: 5),
+    receiveTimeout: const Duration(seconds: 3),
+  ));
+
+  dio.interceptors.add(LogInterceptor(
+    request: true,
+    requestHeader: true,
+    requestBody: true,
+    responseHeader: true,
+    responseBody: true,
+  ));
+  ```
+
+#### 2. 错误处理
+
+- 使用 `try-catch` 捕获 `DioException`。
+- 区分网络错误和业务逻辑错误。
+
+  ```dart
+  try {
+    final response = await dio.get('/endpoint');
+    return response.data;
+  } on DioException catch (e) {
+    if (e.response != null) {
+      throw ServerException(e.response!.data['message']);
+    } else {
+      throw NetworkException(e.message ?? '网络连接失败');
+    }
+  }
+  ```
+
+#### 3. 文件上传
+
+- 使用 `FormData` 上传文件，支持显示上传进度。
+
+  ```dart
+  final formData = FormData.fromMap({
+    'file': await MultipartFile.fromFile(filePath),
+    'other_field': 'value',
+  });
+
+  final response = await dio.post(
+    '/upload',
+    data: formData,
+    onSendProgress: (sent, total) {
+      final progress = sent / total;
+      // 更新进度
+    },
+  );
+  ```
+
+#### 4. 缓存
+
+- 使用 `dio_cache_interceptor` 实现缓存机制。
+- 支持强制刷新策略。
 
 ## UI 和样式
 
-- 使用 Flutter 的内置 widget 并创建自定义 widget。
-- 使用 LayoutBuilder 或 MediaQuery 实现响应式设计。
-- 使用主题在整个应用中保持一致的样式。
-- 使用 Theme.of(context).textTheme.titleLarge 代替 headline6，使用 headlineSmall 代替 headline5 等。
+1. 使用 `Theme.of(context)` 设置一致样式。
+2. 响应式设计：`LayoutBuilder` 和 `MediaQuery`。
+3. 使用 `textTheme` 替代旧的 `headline` 系列。
 
-## 模型和数据库约定
+## Dart/Flutter 工具
 
-- 在数据库表中包含 createdAt、updatedAt 和 isDeleted 字段。
-- 对模型使用 @JsonSerializable(fieldRename: FieldRename.snake)。
-- 对只读字段实现 @JsonKey(includeFromJson: true, includeToJson: false)。
+1. `dart format` 格式化代码。
+2. `dart analyze` 检查代码问题。
+3. `dart fix` 自动修复语法问题。
+4. 使用 `flutter pub run build_runner build` 生成代码。
+5. 使用 `flutter pub run build_runner watch` 自动监听代码变化并生成。
+6. 使用注解工具生成代码：`Freezed`、`Riverpod`、`JsonSerializable`。
+7. 修改注解类后运行：
 
-## Widget 和 UI 组件
+   ```bash
+   flutter pub run build_runner build --delete-conflicting-outputs
+   ```
 
-- 创建小型的私有 widget 类，而不是像 Widget \_build... 这样的方法。
-- 实现 RefreshIndicator 以实现下拉刷新功能。
-- 在 TextFields 中，设置适当的 textCapitalization、keyboardType 和 textInputAction。
-- 在使用 Image.network 时始终包含 errorBuilder。
+## 日志和调试
 
-## 其他
+1. 使用 `log` 替代 `print`。
+2. 使用 `logger` 管理日志。
+3. 在生产环境中禁用日志。
 
-- 使用 log 而非 print 进行调试。
-- 在适当的地方使用 Flutter Hooks / Riverpod Hooks。
-- 保持每行不超过 80 个字符，在多参数函数的右括号前添加逗号。
-- 对进入数据库的枚举使用 @JsonValue(int)。
+## 总结
 
-## 代码生成
-
-- 利用 build_runner 从注解（Freezed、Riverpod、JSON 序列化）生成代码。
-- 在修改带注解的类后运行 'flutter pub run build_runner build --delete-conflicting-outputs'。
-
-## 文档
-
-- 记录复杂的逻辑和不明显的代码决策。
-- 遵循官方的 Flutter、Riverpod 和 Supabase 文档以获取最佳实践。
-
-## 导入规则
-
-1. **使用包名导入**
-
-   - 优先使用 `package:` 导入方式
-   - 示例：`import 'package:my_app/core/constants.dart';`
-   - 避免使用相对路径导入，如 `import '../../core/constants.dart';`
-
-2. **导入顺序**
-
-   - Dart SDK 导入
-   - 第三方包导入
-   - 项目内部导入
-   - 示例：
-
-     ```dart
-     import 'dart:async';
-
-     import 'package:flutter/material.dart';
-     import 'package:riverpod/riverpod.dart';
-
-     import 'package:my_app/core/constants.dart';
-     import 'package:my_app/features/user/user_provider.dart';
-     ```
-
-3. **导入分组**
-
-   - 使用空行分隔不同分组的导入
-   - 保持相关导入在一起
-
-4. **别名导入**
-
-   - 当导入路径过长或可能产生冲突时，使用 `as` 创建别名
-   - 示例：`import 'package:my_long_package_name/core/constants.dart' as constants;`
-
-5. **选择性导入**
-   - 使用 `show` 或 `hide` 限制导入内容
-   - 示例：`import 'package:flutter/material.dart' show Colors, TextStyle;`
-
-请参阅 Flutter、Riverpod 和 Supabase 文档，了解 Widget、状态管理和后端集成的最佳实践。
-
-## 类型约束规则
-
-1. **明确类型声明**
-
-   - 避免使用 `var`，除非类型显而易见
-   - 示例：
-
-     ```dart
-     // 推荐
-     final String name = 'Flutter';
-     final int count = 10;
-
-     // 不推荐
-     var name = 'Flutter';
-     var count = 10;
-     ```
-
-2. **使用类型别名**
-
-   - 对于复杂类型，使用 `typedef` 创建类型别名
-   - 示例：
-
-     ```dart
-     typedef UserList = List<User>;
-     typedef UserMap = Map<String, User>;
-     ```
-
-3. **泛型约束**
-
-   - 使用泛型时，明确指定类型约束
-   - 示例：
-
-     ```dart
-     class Repository<T extends Entity> {
-       // ...
-     }
-     ```
-
-4. **空安全**
-
-   - 明确区分可空和不可空类型
-   - 示例：
-
-     ```dart
-     String? nullableString;
-     String nonNullableString = '';
-     ```
-
-5. **类型转换**
-
-   - 使用 `as` 进行显式类型转换
-   - 在转换前使用 `is` 进行类型检查
-   - 示例：
-
-     ```dart
-     if (value is String) {
-       final stringValue = value as String;
-       // ...
-     }
-     ```
-
-6. **集合类型**
-
-   - 明确指定集合元素的类型
-   - 示例：
-
-     ```dart
-     final List<String> names = ['Alice', 'Bob'];
-     final Map<String, int> scores = {'Alice': 100, 'Bob': 90};
-     ```
-
-7. **函数类型**
-
-   - 明确指定函数的参数和返回类型
-   - 示例：
-
-     ```dart
-     int add(int a, int b) => a + b;
-     ```
-
-8. **类型推断**
-
-   - 在构造函数中使用类型推断时，确保类型明确
-   - 示例：
-
-     ```dart
-     final users = <User>[];
-     final scores = <String, int>{};
-     ```
+通过本指南，开发者可以高效构建清晰、规范和性能优化的 Flutter 应用！
