@@ -11,6 +11,7 @@ export const zhNavbar = defineNavbarConfig([
       { text: "示例", link: "/notes/demo/README.md" },
       { text: "Android", link: "/notes/android/README.md" },
       { text: "Flutter", link: "/notes/flutter/README.md" },
+      { text: "Flutter", link: "/notes/flutter/README.md" },
     ],
   },
 ]);

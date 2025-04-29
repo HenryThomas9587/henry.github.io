@@ -74,13 +74,44 @@ export default defineUserConfig({
        * Shiki 代码高亮
        * @see https://theme-plume.vuejs.press/config/plugins/code-highlight/
        */
-      // shiki: {
-      //   // 强烈建议预设代码块高亮语言，插件默认加载所有语言会产生不必要的时间开销
-      //   languages: ['shell', 'bash', 'typescript', 'javascript'],
-      //   twoslash: true, // 启用 twoslash
-      //   whitespace: true, // 启用 空格/Tab 高亮
-      //   lineNumbers: true, // 启用行号
-      // },
+      shiki: {
+        // 强烈建议预设代码块高亮语言，插件默认加载所有语言会产生不必要的时间开销
+        languages: [
+          "bash",
+          "shell",
+          "sh",
+          "zsh",
+          "bash",
+          "shell",
+          "typescript",
+          "javascript",
+          "kotlin",
+          "java",
+          "sql",
+          "json",
+          "yaml",
+          "xml",
+          "html",
+          "css",
+          "scss",
+          "mermaid",
+          "go",
+          "md",
+          "dart",
+          "python",
+          "php",
+          "ruby",
+          "swift",
+          "kotlin",
+          "c",
+          "c++",
+          "makefile",
+          "cmake",
+        ],
+        twoslash: true, // 启用 twoslash
+        whitespace: true, // 启用 空格/Tab 高亮
+        lineNumbers: true, // 启用行号
+      },
       /* 本地搜索, 默认启用 */
       // search: true,
       /**
@@ -99,13 +130,10 @@ export default defineUserConfig({
        * markdown enhance
        * @see https://theme-plume.vuejs.press/config/plugins/markdown-enhance/
        */
-      // markdownEnhance: {
-      //   demo: true,
-      //   chartjs: true,
-      //   echarts: true,
-      //   mermaid: true,
-      //   flowchart: true,
-      // },
+      markdownEnhance: {
+        mermaid: true,
+        flowchart: true,
+      },
       /**
        *  markdown power
        * @see https://theme-plume.vuejs.press/config/plugin/markdown-power/
@@ -140,9 +168,9 @@ export default defineUserConfig({
        * Markdown 数学公式
        * @see https://theme-plume.vuejs.press/config/plugins/markdown-math/
        */
-      // markdownMath: {
-      //   type: 'katex',
-      // },
+      markdownMath: {
+        type: "katex",
+      },
       /**
        * 水印
        * @see https://theme-plume.vuejs.press/guide/features/watermark/
