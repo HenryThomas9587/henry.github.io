@@ -1,5 +1,7 @@
 ---
 title: 第2章 定义非功能性需求
+createTime: 2025/12/26 16:08:28
+permalink: /ddia/ia4ww5f0/
 ---
 
 # 第2章 定义非功能性需求

@@ -1,5 +1,7 @@
 ---
 title: 第9章 分布式系统的麻烦
+createTime: 2025/12/26 16:12:54
+permalink: /ddia/cpolrctq/
 ---
 
 # 第9章 分布式系统的麻烦

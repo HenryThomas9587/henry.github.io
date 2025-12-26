@@ -1,5 +1,7 @@
 ---
 title: 第5章 编码与演化
+createTime: 2025/12/26 16:07:31
+permalink: /ddia/dxwd3178/
 ---
 
 # 第5章 编码与演化
@@ -46,7 +48,7 @@ mindmap
 graph LR
     A["内存对象<br/>{<br/>  name: 'A'<br/>  age: 25<br/>}"]
     B["字节序列<br/>0x7B 0x22<br/>0x6E 0x61<br/>0x6D 0x65<br/>..."]
-    C["应用场景:<br/>• 写入文件/数据库<br/>• 网络传输 (RPC, REST API)<br/>• 消息队列"]
+    C["应用场景:<br/>• 写入文件/数据库<br/>• 网络传输<br/>  (RPC, REST API)<br/>• 消息队列"]
 
     A -->|"编码 (Encode)<br/>Serialization"| B
     B -->|"解码 (Decode)<br/>Deserialization"| A

@@ -1,5 +1,7 @@
 ---
 title: DDIA 学习笔记
+createTime: 2025/12/26 15:07:44
+permalink: /ddia/
 ---
 
 # 《设计数据密集型应用》学习笔记

@@ -1,5 +1,7 @@
 ---
 title: 第3章 数据模型与查询语言
+createTime: 2025/12/26 16:08:46
+permalink: /ddia/vva8j2cd/
 ---
 
 # 第3章 数据模型与查询语言
@@ -81,9 +83,9 @@ graph LR
 ```mermaid
 graph LR
     A["应用层<br/>对象、数据结构、API"]
-    B["通用数据模型层<br/>JSON / XML / 关系表 / 图 / 时序数据"]
-    C["存储引擎层<br/>B-Tree / LSM-Tree / 列式存储"]
-    D["硬件层<br/>内存 / SSD / HDD / 网络"]
+    B["通用数据模型层<br/>JSON / XML<br/>关系表 / 图<br/>时序数据"]
+    C["存储引擎层<br/>B-Tree<br/>LSM-Tree<br/>列式存储"]
+    D["硬件层<br/>内存 / SSD<br/>HDD / 网络"]
 
     A --> B --> C --> D
 
@@ -161,7 +163,7 @@ graph LR
 
     A -->|外键引用| B
 
-    C["优势<br/>✓ 写入更快（单点更新）<br/>✓ 数据一致性<br/>✓ 节省存储空间"]
+    C["优势<br/>✓ 写入更快<br/>  (单点更新)<br/>✓ 数据一致性<br/>✓ 节省存储空间"]
     D["劣势<br/>✗ 读取需要 JOIN<br/>✗ 查询复杂度增加"]
 
     style A fill:#90CAF9,stroke:#1565C0,stroke-width:2px
@@ -176,7 +178,7 @@ graph LR
 graph LR
     A["用户表<br/>user_id<br/>name<br/>region_name（直接存储）"]
 
-    B["优势<br/>✓ 读取更快（无需 JOIN）<br/>✓ 查询简单"]
+    B["优势<br/>✓ 读取更快<br/>  (无需 JOIN)<br/>✓ 查询简单"]
     C["劣势<br/>✗ 数据冗余<br/>✗ 更新复杂<br/>✗ 一致性风险"]
 
     style A fill:#FFE082,stroke:#FF8F00,stroke-width:2px

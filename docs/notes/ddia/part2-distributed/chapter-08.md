@@ -1,5 +1,7 @@
 ---
 title: 第8章 事务
+createTime: 2025/12/26 16:12:00
+permalink: /ddia/fm1ruuoh/
 ---
 
 # 第8章 事务
