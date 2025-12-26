@@ -22,11 +22,18 @@ title: 第7章 分区
 
 为每个分区分配连续的键范围：
 
-```
-分区1: [A-F]
-分区2: [G-M]
-分区3: [N-S]
-分区4: [T-Z]
+```mermaid
+graph LR
+    A[键空间] --> P1[分区1: A-F]
+    A --> P2[分区2: G-M]
+    A --> P3[分区3: N-S]
+    A --> P4[分区4: T-Z]
+
+    style A fill:#90CAF9,stroke:#1565C0,stroke-width:2px
+    style P1 fill:#A5D6A7,stroke:#2E7D32,stroke-width:2px
+    style P2 fill:#A5D6A7,stroke:#2E7D32,stroke-width:2px
+    style P3 fill:#A5D6A7,stroke:#2E7D32,stroke-width:2px
+    style P4 fill:#A5D6A7,stroke:#2E7D32,stroke-width:2px
 ```
 
 | 优点 | 缺点 |
@@ -43,27 +50,54 @@ title: 第7章 分区
 
 #### 哈希取模
 
-```
-partition = hash(key) % N
+```mermaid
+graph LR
+    K[Key] --> H[hash函数]
+    H --> M[取模 % N]
+    M --> P[分区编号]
+
+    style K fill:#90CAF9,stroke:#1565C0,stroke-width:2px
+    style H fill:#FFE082,stroke:#FF8F00,stroke-width:2px
+    style M fill:#FFE082,stroke:#FF8F00,stroke-width:2px
+    style P fill:#A5D6A7,stroke:#2E7D32,stroke-width:2px
 ```
 
 **问题**：节点数 N 变化时，几乎所有数据都需要重新分配。
 
 #### 一致性哈希
 
-```
-哈希环上的位置 = hash(key)
-顺时针找到第一个节点
+```mermaid
+graph TD
+    K[Key] --> H[hash函数]
+    H --> R[哈希环上的位置]
+    R --> S[顺时针查找]
+    S --> N[第一个节点]
+
+    style K fill:#90CAF9,stroke:#1565C0,stroke-width:2px
+    style H fill:#FFE082,stroke:#FF8F00,stroke-width:2px
+    style R fill:#CE93D8,stroke:#6A1B9A,stroke-width:2px
+    style S fill:#CE93D8,stroke:#6A1B9A,stroke-width:2px
+    style N fill:#A5D6A7,stroke:#2E7D32,stroke-width:2px
 ```
 
 **优点**：节点变化时只影响相邻节点的数据。
 
 #### 固定数量分区
 
-```
-创建远多于节点数的分区（如 1000 个）
-每个节点管理多个分区
-节点变化时，整体迁移分区
+```mermaid
+graph TD
+    S[系统] --> P[创建固定数量分区<br/>如1000个]
+    P --> N1[节点1<br/>管理分区1-250]
+    P --> N2[节点2<br/>管理分区251-500]
+    P --> N3[节点3<br/>管理分区501-750]
+    P --> N4[节点4<br/>管理分区751-1000]
+
+    style S fill:#90CAF9,stroke:#1565C0,stroke-width:2px
+    style P fill:#FFE082,stroke:#FF8F00,stroke-width:2px
+    style N1 fill:#A5D6A7,stroke:#2E7D32,stroke-width:2px
+    style N2 fill:#A5D6A7,stroke:#2E7D32,stroke-width:2px
+    style N3 fill:#A5D6A7,stroke:#2E7D32,stroke-width:2px
+    style N4 fill:#A5D6A7,stroke:#2E7D32,stroke-width:2px
 ```
 
 **优点**：
@@ -84,10 +118,16 @@ partition = hash(key) % N
 
 结合哈希和范围分区的优点：
 
-```
-分区键 = (user_id, timestamp)
-- 按 user_id 哈希确定分区
-- 分区内按 timestamp 排序
+```mermaid
+graph LR
+    K[复合键:<br/>user_id, timestamp] --> H[按user_id哈希]
+    H --> P[确定分区]
+    P --> S[分区内按timestamp排序]
+
+    style K fill:#90CAF9,stroke:#1565C0,stroke-width:2px
+    style H fill:#FFE082,stroke:#FF8F00,stroke-width:2px
+    style P fill:#A5D6A7,stroke:#2E7D32,stroke-width:2px
+    style S fill:#CE93D8,stroke:#6A1B9A,stroke-width:2px
 ```
 
 **应用场景**：社交媒体时间线、用户活动日志等。
@@ -98,10 +138,26 @@ partition = hash(key) % N
 
 每个分区维护自己的二级索引，仅覆盖本分区数据：
 
-```
-分区1: 数据 + 本地索引
-分区2: 数据 + 本地索引
-分区3: 数据 + 本地索引
+```mermaid
+graph TD
+    P1[分区1] --> D1[数据]
+    P1 --> I1[本地索引]
+
+    P2[分区2] --> D2[数据]
+    P2 --> I2[本地索引]
+
+    P3[分区3] --> D3[数据]
+    P3 --> I3[本地索引]
+
+    style P1 fill:#90CAF9,stroke:#1565C0,stroke-width:2px
+    style P2 fill:#90CAF9,stroke:#1565C0,stroke-width:2px
+    style P3 fill:#90CAF9,stroke:#1565C0,stroke-width:2px
+    style D1 fill:#A5D6A7,stroke:#2E7D32,stroke-width:2px
+    style D2 fill:#A5D6A7,stroke:#2E7D32,stroke-width:2px
+    style D3 fill:#A5D6A7,stroke:#2E7D32,stroke-width:2px
+    style I1 fill:#FFE082,stroke:#FF8F00,stroke-width:2px
+    style I2 fill:#FFE082,stroke:#FF8F00,stroke-width:2px
+    style I3 fill:#FFE082,stroke:#FF8F00,stroke-width:2px
 ```
 
 | 优点 | 缺点 |
@@ -113,9 +169,14 @@ partition = hash(key) % N
 
 索引覆盖所有分区数据，但索引本身也需要分区：
 
-```
-索引分区1: 索引 A-M 的所有数据
-索引分区2: 索引 N-Z 的所有数据
+```mermaid
+graph LR
+    D[所有数据分区] --> I1[索引分区1<br/>A-M]
+    D --> I2[索引分区2<br/>N-Z]
+
+    style D fill:#90CAF9,stroke:#1565C0,stroke-width:2px
+    style I1 fill:#FFE082,stroke:#FF8F00,stroke-width:2px
+    style I2 fill:#FFE082,stroke:#FF8F00,stroke-width:2px
 ```
 
 | 优点 | 缺点 |
@@ -149,10 +210,24 @@ partition = hash(key) % N
 
 ### 三种路由方式
 
-```
-方式1：客户端 → 任意节点 → 转发到正确节点
-方式2：客户端 → 路由层 → 正确节点
-方式3：客户端直接连接正确节点
+```mermaid
+graph TD
+    C1[客户端] --> N1[任意节点]
+    N1 --> N2[转发到正确节点]
+
+    C2[客户端] --> R[路由层]
+    R --> N3[正确节点]
+
+    C3[客户端] --> N4[直接连接正确节点]
+
+    style C1 fill:#90CAF9,stroke:#1565C0,stroke-width:2px
+    style C2 fill:#90CAF9,stroke:#1565C0,stroke-width:2px
+    style C3 fill:#90CAF9,stroke:#1565C0,stroke-width:2px
+    style N1 fill:#FFE082,stroke:#FF8F00,stroke-width:2px
+    style N2 fill:#A5D6A7,stroke:#2E7D32,stroke-width:2px
+    style R fill:#CE93D8,stroke:#6A1B9A,stroke-width:2px
+    style N3 fill:#A5D6A7,stroke:#2E7D32,stroke-width:2px
+    style N4 fill:#A5D6A7,stroke:#2E7D32,stroke-width:2px
 ```
 
 ### 分区发现
@@ -167,11 +242,18 @@ partition = hash(key) % N
 
 ### ZooKeeper 在分区发现中的作用
 
-```
-1. 每个节点向 ZooKeeper 注册
-2. ZooKeeper 维护分区到节点的映射
-3. 路由层/客户端订阅 ZooKeeper
-4. 分区变化时，ZooKeeper 通知订阅者
+```mermaid
+graph TD
+    N[节点] --> Z[ZooKeeper注册]
+    Z --> M[维护分区到节点映射]
+    M --> S[路由层/客户端订阅]
+    S --> U[分区变化时通知]
+
+    style N fill:#90CAF9,stroke:#1565C0,stroke-width:2px
+    style Z fill:#FFE082,stroke:#FF8F00,stroke-width:2px
+    style M fill:#CE93D8,stroke:#6A1B9A,stroke-width:2px
+    style S fill:#A5D6A7,stroke:#2E7D32,stroke-width:2px
+    style U fill:#FFAB91,stroke:#D84315,stroke-width:2px
 ```
 
 ## 热点处理
@@ -185,9 +267,18 @@ partition = hash(key) % N
 ### 解决方案
 
 **应用层分散**：
-```
-写入时：key = original_key + random(0, N)
-读取时：查询所有 N 个变体并合并
+
+```mermaid
+graph LR
+    W[写入] --> K[key = original_key + random]
+    R[读取] --> Q[查询所有N个变体]
+    Q --> M[合并结果]
+
+    style W fill:#90CAF9,stroke:#1565C0,stroke-width:2px
+    style K fill:#FFE082,stroke:#FF8F00,stroke-width:2px
+    style R fill:#90CAF9,stroke:#1565C0,stroke-width:2px
+    style Q fill:#CE93D8,stroke:#6A1B9A,stroke-width:2px
+    style M fill:#A5D6A7,stroke:#2E7D32,stroke-width:2px
 ```
 
 **专用分区**：
@@ -201,10 +292,26 @@ partition = hash(key) % N
 
 分区常用于实现多租户系统：
 
-```
-租户A → 分区1, 分区2
-租户B → 分区3
-租户C → 分区4, 分区5, 分区6
+```mermaid
+graph TD
+    TA[租户A] --> P1[分区1]
+    TA --> P2[分区2]
+
+    TB[租户B] --> P3[分区3]
+
+    TC[租户C] --> P4[分区4]
+    TC --> P5[分区5]
+    TC --> P6[分区6]
+
+    style TA fill:#90CAF9,stroke:#1565C0,stroke-width:2px
+    style TB fill:#FFE082,stroke:#FF8F00,stroke-width:2px
+    style TC fill:#CE93D8,stroke:#6A1B9A,stroke-width:2px
+    style P1 fill:#A5D6A7,stroke:#2E7D32,stroke-width:2px
+    style P2 fill:#A5D6A7,stroke:#2E7D32,stroke-width:2px
+    style P3 fill:#A5D6A7,stroke:#2E7D32,stroke-width:2px
+    style P4 fill:#A5D6A7,stroke:#2E7D32,stroke-width:2px
+    style P5 fill:#A5D6A7,stroke:#2E7D32,stroke-width:2px
+    style P6 fill:#A5D6A7,stroke:#2E7D32,stroke-width:2px
 ```
 
 **优势**：
@@ -215,39 +322,83 @@ partition = hash(key) % N
 
 ## 本章总结
 
-```
-分区（Partitioning）
-├── 分区策略
-│   ├── 键范围分区
-│   │   ├── 优点：范围查询高效
-│   │   └── 缺点：热点风险高
-│   ├── 哈希分区
-│   │   ├── 哈希取模：简单但扩展性差
-│   │   ├── 一致性哈希：扩展性好
-│   │   └── 固定分区数：运维可预测
-│   └── 复合分区键
-│       └── 结合哈希和范围的优点
-├── 二级索引分区
-│   ├── 本地索引（文档分区）
-│   │   ├── 写入简单
-│   │   └── 读取需分散/聚集
-│   └── 全局索引（词条分区）
-│       ├── 读取高效
-│       └── 写入复杂
-├── 再平衡
-│   ├── 固定分区数
-│   ├── 动态分区
-│   ├── 按节点比例
-│   └── 自动 vs 手动
-├── 请求路由
-│   ├── 节点转发
-│   ├── 路由层
-│   ├── 客户端直连
-│   └── 协调服务（ZooKeeper）
-└── 热点处理
-    ├── 应用层分散
-    ├── 专用分区
-    └── 系统自动处理
+```mermaid
+graph TD
+    Root[分区 Partitioning] --> Strategy[分区策略]
+    Root --> Index[二级索引分区]
+    Root --> Rebalance[再平衡]
+    Root --> Routing[请求路由]
+    Root --> Hotspot[热点处理]
+
+    Strategy --> KeyRange[键范围分区]
+    KeyRange --> KR1[优点: 范围查询高效]
+    KeyRange --> KR2[缺点: 热点风险高]
+
+    Strategy --> Hash[哈希分区]
+    Hash --> H1[哈希取模: 简单但扩展性差]
+    Hash --> H2[一致性哈希: 扩展性好]
+    Hash --> H3[固定分区数: 运维可预测]
+
+    Strategy --> Composite[复合分区键]
+    Composite --> C1[结合哈希和范围的优点]
+
+    Index --> Local[本地索引 文档分区]
+    Local --> L1[写入简单]
+    Local --> L2[读取需分散/聚集]
+
+    Index --> Global[全局索引 词条分区]
+    Global --> G1[读取高效]
+    Global --> G2[写入复杂]
+
+    Rebalance --> R1[固定分区数]
+    Rebalance --> R2[动态分区]
+    Rebalance --> R3[按节点比例]
+    Rebalance --> R4[自动 vs 手动]
+
+    Routing --> RT1[节点转发]
+    Routing --> RT2[路由层]
+    Routing --> RT3[客户端直连]
+    Routing --> RT4[协调服务 ZooKeeper]
+
+    Hotspot --> HS1[应用层分散]
+    Hotspot --> HS2[专用分区]
+    Hotspot --> HS3[系统自动处理]
+
+    style Root fill:#90CAF9,stroke:#1565C0,stroke-width:3px
+    style Strategy fill:#FFE082,stroke:#FF8F00,stroke-width:2px
+    style Index fill:#FFE082,stroke:#FF8F00,stroke-width:2px
+    style Rebalance fill:#FFE082,stroke:#FF8F00,stroke-width:2px
+    style Routing fill:#FFE082,stroke:#FF8F00,stroke-width:2px
+    style Hotspot fill:#FFE082,stroke:#FF8F00,stroke-width:2px
+
+    style KeyRange fill:#A5D6A7,stroke:#2E7D32,stroke-width:2px
+    style Hash fill:#A5D6A7,stroke:#2E7D32,stroke-width:2px
+    style Composite fill:#A5D6A7,stroke:#2E7D32,stroke-width:2px
+    style Local fill:#A5D6A7,stroke:#2E7D32,stroke-width:2px
+    style Global fill:#A5D6A7,stroke:#2E7D32,stroke-width:2px
+
+    style KR1 fill:#CE93D8,stroke:#6A1B9A,stroke-width:1px
+    style KR2 fill:#CE93D8,stroke:#6A1B9A,stroke-width:1px
+    style H1 fill:#CE93D8,stroke:#6A1B9A,stroke-width:1px
+    style H2 fill:#CE93D8,stroke:#6A1B9A,stroke-width:1px
+    style H3 fill:#CE93D8,stroke:#6A1B9A,stroke-width:1px
+    style C1 fill:#CE93D8,stroke:#6A1B9A,stroke-width:1px
+    style L1 fill:#CE93D8,stroke:#6A1B9A,stroke-width:1px
+    style L2 fill:#CE93D8,stroke:#6A1B9A,stroke-width:1px
+    style G1 fill:#CE93D8,stroke:#6A1B9A,stroke-width:1px
+    style G2 fill:#CE93D8,stroke:#6A1B9A,stroke-width:1px
+
+    style R1 fill:#CE93D8,stroke:#6A1B9A,stroke-width:1px
+    style R2 fill:#CE93D8,stroke:#6A1B9A,stroke-width:1px
+    style R3 fill:#CE93D8,stroke:#6A1B9A,stroke-width:1px
+    style R4 fill:#CE93D8,stroke:#6A1B9A,stroke-width:1px
+    style RT1 fill:#CE93D8,stroke:#6A1B9A,stroke-width:1px
+    style RT2 fill:#CE93D8,stroke:#6A1B9A,stroke-width:1px
+    style RT3 fill:#CE93D8,stroke:#6A1B9A,stroke-width:1px
+    style RT4 fill:#CE93D8,stroke:#6A1B9A,stroke-width:1px
+    style HS1 fill:#CE93D8,stroke:#6A1B9A,stroke-width:1px
+    style HS2 fill:#CE93D8,stroke:#6A1B9A,stroke-width:1px
+    style HS3 fill:#CE93D8,stroke:#6A1B9A,stroke-width:1px
 ```
 
 **核心要点**：

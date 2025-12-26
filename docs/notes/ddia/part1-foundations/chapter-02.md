@@ -27,32 +27,36 @@ title: 第2章 定义非功能性需求
 
 ### 两种实现方案
 
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│                    方案一：Pull 模式（实时查询）                      │
-├─────────────────────────────────────────────────────────────────────┤
-│                                                                     │
-│   用户A ──请求时间线──▶ [数据库] ──JOIN查询──▶ 合并排序 ──▶ 返回    │
-│                           │                                         │
-│                           ▼                                         │
-│                    查询所有关注者的帖子                              │
-│                    (每秒 4 亿次查找)                                 │
-│                                                                     │
-└─────────────────────────────────────────────────────────────────────┘
+```mermaid
+graph LR
+    subgraph Pull模式[方案一: Pull 模式 - 实时查询]
+        U1[用户A] -->|请求时间线| DB1[(数据库)]
+        DB1 -->|JOIN查询| SORT1[合并排序]
+        SORT1 -->|返回| U1
+    end
 
-┌─────────────────────────────────────────────────────────────────────┐
-│                    方案二：Push 模式（扇出写入）                      │
-├─────────────────────────────────────────────────────────────────────┤
-│                                                                     │
-│   用户B发帖 ──写入──▶ [时间线缓存]                                   │
-│       │                   │                                         │
-│       │              ┌────┴────┐                                    │
-│       │              ▼    ▼    ▼                                    │
-│       └──扇出──▶  粉丝1 粉丝2 粉丝3 ... (200个粉丝)                  │
-│                                                                     │
-│   用户A ──请求时间线──▶ 直接读取缓存 ──▶ 返回                        │
-│                                                                     │
-└─────────────────────────────────────────────────────────────────────┘
+    style U1 fill:#90CAF9,stroke:#1565C0,stroke-width:2px
+    style DB1 fill:#FFE082,stroke:#FF8F00,stroke-width:2px
+    style SORT1 fill:#CE93D8,stroke:#6A1B9A,stroke-width:2px
+```
+
+```mermaid
+graph LR
+    subgraph Push模式[方案二: Push 模式 - 扇出写入]
+        U2[用户B发帖] -->|写入| CACHE[(时间线缓存)]
+        CACHE -->|扇出| F1[粉丝1]
+        CACHE -->|扇出| F2[粉丝2]
+        CACHE -->|扇出| F3[粉丝3...]
+        U3[用户A] -->|请求| CACHE
+        CACHE -->|直接返回| U3
+    end
+
+    style U2 fill:#A5D6A7,stroke:#2E7D32,stroke-width:2px
+    style U3 fill:#90CAF9,stroke:#1565C0,stroke-width:2px
+    style CACHE fill:#FFE082,stroke:#FF8F00,stroke-width:2px
+    style F1 fill:#FFAB91,stroke:#D84315,stroke-width:2px
+    style F2 fill:#FFAB91,stroke:#D84315,stroke-width:2px
+    style F3 fill:#FFAB91,stroke:#D84315,stroke-width:2px
 ```
 
 #### 方案一：实时查询（Pull 模式）

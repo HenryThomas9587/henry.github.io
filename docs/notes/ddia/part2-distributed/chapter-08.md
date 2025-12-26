@@ -18,14 +18,25 @@ title: 第8章 事务
 
 **定义**：事务中的所有操作要么全部成功，要么全部失败回滚。
 
-```
-事务开始
-├── 操作1: 扣减账户A余额
-├── 操作2: 增加账户B余额
-└── 提交/回滚
+```mermaid
+graph TD
+    A[事务开始] --> B[操作1: 扣减账户A余额]
+    B --> C[操作2: 增加账户B余额]
+    C --> D{是否成功?}
+    D -->|成功| E[提交]
+    D -->|失败| F[回滚]
+    F -.->|回滚操作1| G[恢复账户A余额]
 
-如果操作2失败，操作1也会回滚
+    style A fill:#90CAF9,stroke:#1565C0,stroke-width:2px
+    style B fill:#FFE082,stroke:#FF8F00,stroke-width:2px
+    style C fill:#FFE082,stroke:#FF8F00,stroke-width:2px
+    style D fill:#CE93D8,stroke:#6A1B9A,stroke-width:2px
+    style E fill:#A5D6A7,stroke:#2E7D32,stroke-width:2px
+    style F fill:#FFAB91,stroke:#D84315,stroke-width:2px
+    style G fill:#FFE082,stroke:#FF8F00,stroke-width:2px
 ```
+
+**说明**：如果操作2失败，操作1也会回滚
 
 **关键点**：
 - 描述故障时的行为，而非并发
@@ -77,11 +88,16 @@ title: 第8章 事务
 
 **核心思想**：每个事务从数据库的一致快照读取。
 
-```
-事务开始时创建快照
-├── 读取：始终从快照读取
-├── 写入：写入新版本
-└── 提交：检查冲突
+```mermaid
+graph LR
+    A[事务开始时创建快照] --> B[读取: 始终从快照读取]
+    B --> C[写入: 写入新版本]
+    C --> D[提交: 检查冲突]
+
+    style A fill:#90CAF9,stroke:#1565C0,stroke-width:2px
+    style B fill:#FFE082,stroke:#FF8F00,stroke-width:2px
+    style C fill:#A5D6A7,stroke:#2E7D32,stroke-width:2px
+    style D fill:#CE93D8,stroke:#6A1B9A,stroke-width:2px
 ```
 
 **MVCC（多版本并发控制）**：
@@ -106,10 +122,24 @@ title: 第8章 事务
 
 读取到其他事务未提交的数据。
 
-```
-事务A: 写入 x=1（未提交）
-事务B: 读取 x=1（脏读）
-事务A: 回滚
+```mermaid
+sequenceDiagram
+    participant A as 事务A
+    participant DB as 数据库
+    participant B as 事务B
+
+    A->>DB: 写入 x=1 (未提交)
+    B->>DB: 读取 x=1 (脏读)
+    Note over B: 读到未提交的数据
+    A->>DB: 回滚
+    Note over B: 读到的数据无效
+
+    box rgba(255, 171, 145, 0.3) 事务A
+    participant A
+    end
+    box rgba(255, 224, 130, 0.3) 事务B
+    participant B
+    end
 ```
 
 **解决**：读已提交隔离级别
@@ -124,11 +154,25 @@ title: 第8章 事务
 
 在同一事务中，读取到不一致的数据状态。
 
-```
-事务A: 读取账户1余额=500
-事务B: 转账100（账户1→账户2），提交
-事务A: 读取账户2余额=600
-事务A: 看到总额=1100（不一致）
+```mermaid
+sequenceDiagram
+    participant A as 事务A
+    participant DB as 数据库
+    participant B as 事务B
+
+    A->>DB: 读取账户1余额=500
+    B->>DB: 转账100 (账户1→账户2)
+    B->>DB: 提交
+    A->>DB: 读取账户2余额=600
+    Note over A: 看到总额=1100 (不一致!)
+    Note over A: 实际总额应该是1000
+
+    box rgba(144, 202, 249, 0.3) 事务A
+    participant A
+    end
+    box rgba(255, 224, 130, 0.3) 事务B
+    participant B
+    end
 ```
 
 **解决**：快照隔离
@@ -137,11 +181,25 @@ title: 第8章 事务
 
 两个事务并发执行读-修改-写循环，一个更新被覆盖。
 
-```
-事务A: 读取 counter=10
-事务B: 读取 counter=10
-事务A: 写入 counter=11
-事务B: 写入 counter=11（丢失A的更新）
+```mermaid
+sequenceDiagram
+    participant A as 事务A
+    participant DB as 数据库
+    participant B as 事务B
+
+    A->>DB: 读取 counter=10
+    B->>DB: 读取 counter=10
+    A->>DB: 写入 counter=11
+    B->>DB: 写入 counter=11
+    Note over DB: 事务A的更新丢失!
+    Note over DB: 最终值应该是12
+
+    box rgba(144, 202, 249, 0.3) 事务A
+    participant A
+    end
+    box rgba(255, 224, 130, 0.3) 事务B
+    participant B
+    end
 ```
 
 **解决方案**：
@@ -157,14 +215,27 @@ title: 第8章 事务
 
 两个事务读取相同数据，根据读取结果做出决策并写入，但决策前提在写入时已不成立。
 
-```
-约束：至少有一名医生值班
+```mermaid
+sequenceDiagram
+    participant A as 事务A (医生1)
+    participant DB as 数据库
+    participant B as 事务B (医生2)
 
-事务A: 查询值班医生数=2，决定下班
-事务B: 查询值班医生数=2，决定下班
-事务A: 更新自己为不值班
-事务B: 更新自己为不值班
-结果：无人值班（违反约束）
+    Note over DB: 约束: 至少有一名医生值班
+    A->>DB: 查询值班医生数=2
+    B->>DB: 查询值班医生数=2
+    Note over A: 决定下班 (还有1人值班)
+    Note over B: 决定下班 (还有1人值班)
+    A->>DB: 更新自己为不值班
+    B->>DB: 更新自己为不值班
+    Note over DB: 结果: 无人值班 (违反约束!)
+
+    box rgba(144, 202, 249, 0.3) 事务A
+    participant A
+    end
+    box rgba(255, 224, 130, 0.3) 事务B
+    participant B
+    end
 ```
 
 **解决**：可串行化隔离
@@ -173,11 +244,25 @@ title: 第8章 事务
 
 一个事务的写入改变另一个事务搜索查询的结果。
 
-```
-事务A: 查询会议室12:00-13:00无预订
-事务B: 插入会议室12:00-13:00预订
-事务A: 插入会议室12:00-13:00预订
-结果：双重预订
+```mermaid
+sequenceDiagram
+    participant A as 事务A
+    participant DB as 数据库
+    participant B as 事务B
+
+    A->>DB: 查询会议室12:00-13:00无预订
+    B->>DB: 插入会议室12:00-13:00预订
+    B->>DB: 提交
+    A->>DB: 插入会议室12:00-13:00预订
+    A->>DB: 提交
+    Note over DB: 结果: 双重预订!
+
+    box rgba(144, 202, 249, 0.3) 事务A
+    participant A
+    end
+    box rgba(255, 224, 130, 0.3) 事务B
+    participant B
+    end
 ```
 
 **解决**：谓词锁或索引范围锁
@@ -217,10 +302,18 @@ title: 第8章 事务
 
 **核心思想**：乐观并发控制 + 冲突检测
 
-```
-1. 事务在快照上执行（不阻塞）
-2. 提交时检测冲突
-3. 有冲突则回滚重试
+```mermaid
+graph LR
+    A[1. 事务在快照上执行<br/>不阻塞] --> B[2. 提交时检测冲突]
+    B --> C{是否有冲突?}
+    C -->|无冲突| D[提交成功]
+    C -->|有冲突| E[回滚重试]
+
+    style A fill:#90CAF9,stroke:#1565C0,stroke-width:2px
+    style B fill:#FFE082,stroke:#FF8F00,stroke-width:2px
+    style C fill:#CE93D8,stroke:#6A1B9A,stroke-width:2px
+    style D fill:#A5D6A7,stroke:#2E7D32,stroke-width:2px
+    style E fill:#FFAB91,stroke:#D84315,stroke-width:2px
 ```
 
 **检测的冲突类型**：
@@ -255,16 +348,40 @@ title: 第8章 事务
 
 **流程**：
 
-```
-阶段1：准备
-协调者 → 所有参与者: "准备提交？"
-参与者 → 协调者: "是/否"
+```mermaid
+sequenceDiagram
+    participant C as 协调者
+    participant P1 as 参与者1
+    participant P2 as 参与者2
+    participant P3 as 参与者3
 
-阶段2：提交/回滚
-如果所有参与者回答"是":
-  协调者 → 所有参与者: "提交"
-否则:
-  协调者 → 所有参与者: "回滚"
+    Note over C,P3: 阶段1: 准备
+    C->>P1: 准备提交?
+    C->>P2: 准备提交?
+    C->>P3: 准备提交?
+    P1-->>C: 是
+    P2-->>C: 是
+    P3-->>C: 是
+
+    Note over C,P3: 阶段2: 提交
+    alt 所有参与者回答"是"
+        C->>P1: 提交
+        C->>P2: 提交
+        C->>P3: 提交
+    else 任一参与者回答"否"
+        C->>P1: 回滚
+        C->>P2: 回滚
+        C->>P3: 回滚
+    end
+
+    box rgba(144, 202, 249, 0.3) 协调者
+    participant C
+    end
+    box rgba(255, 224, 130, 0.3) 参与者
+    participant P1
+    participant P2
+    participant P3
+    end
 ```
 
 **问题**：
@@ -278,31 +395,66 @@ title: 第8章 事务
 
 ## 本章总结
 
-```
-事务
-├── ACID 属性
-│   ├── 原子性：全有或全无
-│   ├── 一致性：满足约束
-│   ├── 隔离性：并发隔离
-│   └── 持久性：数据不丢失
-├── 隔离级别
-│   ├── 读未提交：最弱
-│   ├── 读已提交：防止脏读/脏写
-│   ├── 快照隔离：MVCC，防止读偏斜
-│   └── 可串行化：最强
-├── 并发问题
-│   ├── 脏读/脏写
-│   ├── 读偏斜（不可重复读）
-│   ├── 丢失更新
-│   ├── 写偏斜
-│   └── 幻读
-├── 实现可串行化
-│   ├── 串行执行：简单但吞吐量低
-│   ├── 两阶段锁定：悲观，性能差
-│   └── SSI：乐观，性能好
-└── 分布式事务
-    ├── 两阶段提交（2PC）
-    └── XA 事务
+```mermaid
+graph TD
+    A[事务] --> B[ACID 属性]
+    A --> C[隔离级别]
+    A --> D[并发问题]
+    A --> E[实现可串行化]
+    A --> F[分布式事务]
+
+    B --> B1[原子性: 全有或全无]
+    B --> B2[一致性: 满足约束]
+    B --> B3[隔离性: 并发隔离]
+    B --> B4[持久性: 数据不丢失]
+
+    C --> C1[读未提交: 最弱]
+    C --> C2[读已提交: 防止脏读/脏写]
+    C --> C3[快照隔离: MVCC，防止读偏斜]
+    C --> C4[可串行化: 最强]
+
+    D --> D1[脏读/脏写]
+    D --> D2[读偏斜 不可重复读]
+    D --> D3[丢失更新]
+    D --> D4[写偏斜]
+    D --> D5[幻读]
+
+    E --> E1[串行执行: 简单但吞吐量低]
+    E --> E2[两阶段锁定: 悲观，性能差]
+    E --> E3[SSI: 乐观，性能好]
+
+    F --> F1[两阶段提交 2PC]
+    F --> F2[XA 事务]
+
+    style A fill:#90CAF9,stroke:#1565C0,stroke-width:3px
+    style B fill:#FFE082,stroke:#FF8F00,stroke-width:2px
+    style C fill:#A5D6A7,stroke:#2E7D32,stroke-width:2px
+    style D fill:#FFAB91,stroke:#D84315,stroke-width:2px
+    style E fill:#CE93D8,stroke:#6A1B9A,stroke-width:2px
+    style F fill:#FFE082,stroke:#FF8F00,stroke-width:2px
+
+    style B1 fill:#FFF9C4,stroke:#F57F17,stroke-width:1px
+    style B2 fill:#FFF9C4,stroke:#F57F17,stroke-width:1px
+    style B3 fill:#FFF9C4,stroke:#F57F17,stroke-width:1px
+    style B4 fill:#FFF9C4,stroke:#F57F17,stroke-width:1px
+
+    style C1 fill:#C8E6C9,stroke:#1B5E20,stroke-width:1px
+    style C2 fill:#C8E6C9,stroke:#1B5E20,stroke-width:1px
+    style C3 fill:#C8E6C9,stroke:#1B5E20,stroke-width:1px
+    style C4 fill:#C8E6C9,stroke:#1B5E20,stroke-width:1px
+
+    style D1 fill:#FFCCBC,stroke:#BF360C,stroke-width:1px
+    style D2 fill:#FFCCBC,stroke:#BF360C,stroke-width:1px
+    style D3 fill:#FFCCBC,stroke:#BF360C,stroke-width:1px
+    style D4 fill:#FFCCBC,stroke:#BF360C,stroke-width:1px
+    style D5 fill:#FFCCBC,stroke:#BF360C,stroke-width:1px
+
+    style E1 fill:#E1BEE7,stroke:#4A148C,stroke-width:1px
+    style E2 fill:#E1BEE7,stroke:#4A148C,stroke-width:1px
+    style E3 fill:#E1BEE7,stroke:#4A148C,stroke-width:1px
+
+    style F1 fill:#FFF9C4,stroke:#F57F17,stroke-width:1px
+    style F2 fill:#FFF9C4,stroke:#F57F17,stroke-width:1px
 ```
 
 **核心要点**：

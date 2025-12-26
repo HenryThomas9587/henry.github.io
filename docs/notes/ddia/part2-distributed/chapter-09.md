@@ -18,15 +18,24 @@ title: 第9章 分布式系统的麻烦
 
 在异步分组网络中，发送请求但未收到响应时，可能的原因：
 
-```
-请求发送 ─────────────────────────────→ ?
-         │
-         ├── 请求丢失
-         ├── 请求在队列中等待
-         ├── 远程节点已崩溃
-         ├── 远程节点暂时无响应
-         ├── 响应丢失
-         └── 响应在队列中等待
+```mermaid
+graph LR
+    A[请求发送] --> B{未收到响应}
+    B --> C[请求丢失]
+    B --> D[请求在队列中等待]
+    B --> E[远程节点已崩溃]
+    B --> F[远程节点暂时无响应]
+    B --> G[响应丢失]
+    B --> H[响应在队列中等待]
+
+    style A fill:#90CAF9,stroke:#1565C0,stroke-width:2px
+    style B fill:#FFE082,stroke:#FF8F00,stroke-width:2px
+    style C fill:#FFAB91,stroke:#D84315,stroke-width:2px
+    style D fill:#FFAB91,stroke:#D84315,stroke-width:2px
+    style E fill:#FFAB91,stroke:#D84315,stroke-width:2px
+    style F fill:#FFAB91,stroke:#D84315,stroke-width:2px
+    style G fill:#FFAB91,stroke:#D84315,stroke-width:2px
+    style H fill:#FFAB91,stroke:#D84315,stroke-width:2px
 ```
 
 > "发送方甚至无法判断数据包是否已交付：唯一的选择是让接收方发送响应消息，而响应消息本身也可能丢失或延迟。"
@@ -49,14 +58,25 @@ title: 第9章 分布式系统的麻烦
 
 ### 网络延迟的来源
 
-```
-延迟 = 传播延迟 + 排队延迟 + 处理延迟
+```mermaid
+graph TD
+    A[总延迟] --> B[传播延迟]
+    A --> C[排队延迟]
+    A --> D[处理延迟]
 
-排队发生在：
-├── 网络交换机队列
-├── 操作系统接收/发送缓冲区
-├── 虚拟化环境的暂停
-└── TCP 流量控制（拥塞窗口）
+    C --> E[网络交换机队列]
+    C --> F[操作系统接收/发送缓冲区]
+    C --> G[虚拟化环境的暂停]
+    C --> H[TCP 流量控制<br/>拥塞窗口]
+
+    style A fill:#90CAF9,stroke:#1565C0,stroke-width:2px
+    style B fill:#A5D6A7,stroke:#2E7D32,stroke-width:2px
+    style C fill:#FFE082,stroke:#FF8F00,stroke-width:2px
+    style D fill:#A5D6A7,stroke:#2E7D32,stroke-width:2px
+    style E fill:#CE93D8,stroke:#6A1B9A,stroke-width:2px
+    style F fill:#CE93D8,stroke:#6A1B9A,stroke-width:2px
+    style G fill:#CE93D8,stroke:#6A1B9A,stroke-width:2px
+    style H fill:#CE93D8,stroke:#6A1B9A,stroke-width:2px
 ```
 
 > "在公共云和多租户数据中心中，资源在许多客户之间共享"，导致延迟高度可变。
@@ -89,13 +109,20 @@ title: 第9章 分布式系统的麻烦
 
 ### 时钟同步的挑战
 
-```
-时钟漂移来源：
-├── 石英晶体频率偏差（可达 200ppm）
-├── 温度变化影响
-├── NTP 同步延迟
-├── 闰秒处理
-└── 虚拟化环境的时钟虚拟化
+```mermaid
+graph TD
+    A[时钟漂移来源] --> B[石英晶体频率偏差<br/>可达 200ppm]
+    A --> C[温度变化影响]
+    A --> D[NTP 同步延迟]
+    A --> E[闰秒处理]
+    A --> F[虚拟化环境的<br/>时钟虚拟化]
+
+    style A fill:#90CAF9,stroke:#1565C0,stroke-width:2px
+    style B fill:#FFAB91,stroke:#D84315,stroke-width:2px
+    style C fill:#FFAB91,stroke:#D84315,stroke-width:2px
+    style D fill:#FFAB91,stroke:#D84315,stroke-width:2px
+    style E fill:#FFAB91,stroke:#D84315,stroke-width:2px
+    style F fill:#FFAB91,stroke:#D84315,stroke-width:2px
 ```
 
 **NTP 同步的局限**：
@@ -240,13 +267,20 @@ N 个节点的系统：
 
 ### 故障注入
 
-```
-混沌工程：
-├── 随机终止进程
-├── 注入网络延迟
-├── 模拟网络分区
-├── 填满磁盘空间
-└── 模拟时钟偏差
+```mermaid
+graph TD
+    A[混沌工程] --> B[随机终止进程]
+    A --> C[注入网络延迟]
+    A --> D[模拟网络分区]
+    A --> E[填满磁盘空间]
+    A --> F[模拟时钟偏差]
+
+    style A fill:#90CAF9,stroke:#1565C0,stroke-width:2px
+    style B fill:#FFAB91,stroke:#D84315,stroke-width:2px
+    style C fill:#FFAB91,stroke:#D84315,stroke-width:2px
+    style D fill:#FFAB91,stroke:#D84315,stroke-width:2px
+    style E fill:#FFAB91,stroke:#D84315,stroke-width:2px
+    style F fill:#FFAB91,stroke:#D84315,stroke-width:2px
 ```
 
 ### 确定性模拟测试
@@ -255,29 +289,62 @@ N 个节点的系统：
 
 ## 本章总结
 
-```
-分布式系统的麻烦
-├── 不可靠的网络
-│   ├── 消息可能丢失、延迟、重复
-│   ├── 无法区分节点崩溃和网络分区
-│   ├── 超时是唯一的故障检测手段
-│   └── 延迟高度可变（排队是主因）
-├── 不可靠的时钟
-│   ├── 日历时钟 vs 单调时钟
-│   ├── 时钟漂移和 NTP 同步限制
-│   ├── 时间戳排序的危险
-│   └── 逻辑时钟是更安全的替代
-├── 进程暂停
-│   ├── GC、VM暂停、I/O等待
-│   ├── 租约/锁可能在暂停期间过期
-│   └── 隔离令牌防止脑裂
-├── 知识与真相
-│   ├── 多数派仲裁
-│   ├── 拜占庭故障
-│   └── 系统模型（时序、故障）
-└── 安全性与活性
-    ├── 安全性：没有坏事发生
-    └── 活性：好事最终发生
+```mermaid
+graph TD
+    A[分布式系统的麻烦] --> B[不可靠的网络]
+    A --> C[不可靠的时钟]
+    A --> D[进程暂停]
+    A --> E[知识与真相]
+    A --> F[安全性与活性]
+
+    B --> B1[消息可能丢失、延迟、重复]
+    B --> B2[无法区分节点崩溃和网络分区]
+    B --> B3[超时是唯一的故障检测手段]
+    B --> B4[延迟高度可变<br/>排队是主因]
+
+    C --> C1[日历时钟 vs 单调时钟]
+    C --> C2[时钟漂移和 NTP 同步限制]
+    C --> C3[时间戳排序的危险]
+    C --> C4[逻辑时钟是更安全的替代]
+
+    D --> D1[GC、VM暂停、I/O等待]
+    D --> D2[租约/锁可能在暂停期间过期]
+    D --> D3[隔离令牌防止脑裂]
+
+    E --> E1[多数派仲裁]
+    E --> E2[拜占庭故障]
+    E --> E3[系统模型<br/>时序、故障]
+
+    F --> F1[安全性：没有坏事发生]
+    F --> F2[活性：好事最终发生]
+
+    style A fill:#90CAF9,stroke:#1565C0,stroke-width:3px
+    style B fill:#FFE082,stroke:#FF8F00,stroke-width:2px
+    style C fill:#FFE082,stroke:#FF8F00,stroke-width:2px
+    style D fill:#FFE082,stroke:#FF8F00,stroke-width:2px
+    style E fill:#FFE082,stroke:#FF8F00,stroke-width:2px
+    style F fill:#FFE082,stroke:#FF8F00,stroke-width:2px
+
+    style B1 fill:#FFAB91,stroke:#D84315,stroke-width:1px
+    style B2 fill:#FFAB91,stroke:#D84315,stroke-width:1px
+    style B3 fill:#FFAB91,stroke:#D84315,stroke-width:1px
+    style B4 fill:#FFAB91,stroke:#D84315,stroke-width:1px
+
+    style C1 fill:#CE93D8,stroke:#6A1B9A,stroke-width:1px
+    style C2 fill:#CE93D8,stroke:#6A1B9A,stroke-width:1px
+    style C3 fill:#CE93D8,stroke:#6A1B9A,stroke-width:1px
+    style C4 fill:#CE93D8,stroke:#6A1B9A,stroke-width:1px
+
+    style D1 fill:#A5D6A7,stroke:#2E7D32,stroke-width:1px
+    style D2 fill:#A5D6A7,stroke:#2E7D32,stroke-width:1px
+    style D3 fill:#A5D6A7,stroke:#2E7D32,stroke-width:1px
+
+    style E1 fill:#90CAF9,stroke:#1565C0,stroke-width:1px
+    style E2 fill:#90CAF9,stroke:#1565C0,stroke-width:1px
+    style E3 fill:#90CAF9,stroke:#1565C0,stroke-width:1px
+
+    style F1 fill:#FFE082,stroke:#FF8F00,stroke-width:1px
+    style F2 fill:#FFE082,stroke:#FF8F00,stroke-width:1px
 ```
 
 **核心要点**：

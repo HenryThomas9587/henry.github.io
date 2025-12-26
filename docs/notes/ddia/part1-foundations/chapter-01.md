@@ -16,24 +16,39 @@ title: 第1章 可靠性、可扩展性与可维护性
 
 数据密集型应用通常由多个系统组合而成：
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                      应用程序代码                            │
-└─────────────────────────────────────────────────────────────┘
-        │              │              │              │
-        ▼              ▼              ▼              ▼
-   ┌─────────┐   ┌─────────┐   ┌─────────┐   ┌─────────┐
-   │  数据库  │   │   缓存   │   │搜索引擎 │   │消息队列 │
-   │(持久化) │   │(加速)   │   │(检索)   │   │(异步)   │
-   └─────────┘   └─────────┘   └─────────┘   └─────────┘
-        │              │              │              │
-        └──────────────┴──────────────┴──────────────┘
-                              │
-                              ▼
-                    ┌─────────────────┐
-                    │   批处理/流处理  │
-                    │   (数据分析)     │
-                    └─────────────────┘
+```mermaid
+graph TB
+    subgraph 应用层
+        APP[应用程序代码]
+    end
+
+    subgraph 数据存储层
+        DB[(数据库<br/>持久化)]
+        CACHE[(缓存<br/>加速)]
+        SEARCH[(搜索引擎<br/>检索)]
+        MQ[(消息队列<br/>异步)]
+    end
+
+    subgraph 数据处理层
+        BATCH[批处理/流处理<br/>数据分析]
+    end
+
+    APP --> DB
+    APP --> CACHE
+    APP --> SEARCH
+    APP --> MQ
+
+    DB --> BATCH
+    CACHE --> BATCH
+    SEARCH --> BATCH
+    MQ --> BATCH
+
+    style APP fill:#90CAF9,stroke:#1565C0,stroke-width:2px
+    style DB fill:#FFE082,stroke:#FF8F00,stroke-width:2px
+    style CACHE fill:#FFE082,stroke:#FF8F00,stroke-width:2px
+    style SEARCH fill:#FFE082,stroke:#FF8F00,stroke-width:2px
+    style MQ fill:#FFE082,stroke:#FF8F00,stroke-width:2px
+    style BATCH fill:#CE93D8,stroke:#6A1B9A,stroke-width:2px
 ```
 
 | 组件 | 作用 |
@@ -46,25 +61,39 @@ title: 第1章 可靠性、可扩展性与可维护性
 
 ## 三大设计目标
 
-```
-                    ┌─────────────────────────────────────┐
-                    │         数据密集型应用设计           │
-                    └─────────────────────────────────────┘
-                                      │
-           ┌──────────────────────────┼──────────────────────────┐
-           │                          │                          │
-           ▼                          ▼                          ▼
-    ┌─────────────┐           ┌─────────────┐           ┌─────────────┐
-    │   可靠性    │           │  可扩展性   │           │  可维护性   │
-    │ Reliability │           │ Scalability │           │Maintaintic │
-    └─────────────┘           └─────────────┘           └─────────────┘
-           │                          │                          │
-           ▼                          ▼                          ▼
-    ┌─────────────┐           ┌─────────────┐           ┌─────────────┐
-    │ • 硬件故障  │           │ • 数据量    │           │ • 可操作性  │
-    │ • 软件Bug   │           │ • 流量      │           │ • 简单性    │
-    │ • 人为错误  │           │ • 并发用户  │           │ • 可演化性  │
-    └─────────────┘           └─────────────┘           └─────────────┘
+```mermaid
+graph TB
+    ROOT[数据密集型应用设计]
+
+    ROOT --> R[可靠性<br/>Reliability]
+    ROOT --> S[可扩展性<br/>Scalability]
+    ROOT --> M[可维护性<br/>Maintainability]
+
+    R --> R1[硬件故障]
+    R --> R2[软件Bug]
+    R --> R3[人为错误]
+
+    S --> S1[数据量增长]
+    S --> S2[流量增长]
+    S --> S3[并发用户增长]
+
+    M --> M1[可操作性]
+    M --> M2[简单性]
+    M --> M3[可演化性]
+
+    style ROOT fill:#90CAF9,stroke:#1565C0,stroke-width:2px
+    style R fill:#FFAB91,stroke:#D84315,stroke-width:2px
+    style S fill:#A5D6A7,stroke:#2E7D32,stroke-width:2px
+    style M fill:#FFE082,stroke:#FF8F00,stroke-width:2px
+    style R1 fill:#FFCDD2,stroke:#E57373,stroke-width:2px
+    style R2 fill:#FFCDD2,stroke:#E57373,stroke-width:2px
+    style R3 fill:#FFCDD2,stroke:#E57373,stroke-width:2px
+    style S1 fill:#C8E6C9,stroke:#81C784,stroke-width:2px
+    style S2 fill:#C8E6C9,stroke:#81C784,stroke-width:2px
+    style S3 fill:#C8E6C9,stroke:#81C784,stroke-width:2px
+    style M1 fill:#FFECB3,stroke:#FFC107,stroke-width:2px
+    style M2 fill:#FFECB3,stroke:#FFC107,stroke-width:2px
+    style M3 fill:#FFECB3,stroke:#FFC107,stroke-width:2px
 ```
 
 ### 可靠性（Reliability）

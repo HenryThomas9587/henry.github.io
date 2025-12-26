@@ -12,29 +12,19 @@ title: 第3章 数据模型与查询语言
 
 ### 数据模型的抽象层次
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                     应用层                                   │
-│              对象、数据结构、API                              │
-└─────────────────────────────────────────────────────────────┘
-                            │
-                            ▼
-┌─────────────────────────────────────────────────────────────┐
-│                   通用数据模型层                              │
-│         JSON / XML / 关系表 / 图 / 时序数据                   │
-└─────────────────────────────────────────────────────────────┘
-                            │
-                            ▼
-┌─────────────────────────────────────────────────────────────┐
-│                     存储引擎层                               │
-│            B-Tree / LSM-Tree / 列式存储                      │
-└─────────────────────────────────────────────────────────────┘
-                            │
-                            ▼
-┌─────────────────────────────────────────────────────────────┐
-│                      硬件层                                  │
-│           内存 / SSD / HDD / 网络                            │
-└─────────────────────────────────────────────────────────────┘
+```mermaid
+graph TD
+    A["应用层<br/>对象、数据结构、API"]
+    B["通用数据模型层<br/>JSON / XML / 关系表 / 图 / 时序数据"]
+    C["存储引擎层<br/>B-Tree / LSM-Tree / 列式存储"]
+    D["硬件层<br/>内存 / SSD / HDD / 网络"]
+
+    A --> B --> C --> D
+
+    style A fill:#90CAF9,stroke:#1565C0,stroke-width:2px
+    style B fill:#A5D6A7,stroke:#2E7D32,stroke-width:2px
+    style C fill:#FFE082,stroke:#FF8F00,stroke-width:2px
+    style D fill:#FFAB91,stroke:#D84315,stroke-width:2px
 ```
 
 ## 关系模型 vs 文档模型
@@ -91,38 +81,34 @@ title: 第3章 数据模型与查询语言
 
 #### 规范化（Normalization）
 
-```
-用户表
-├── user_id
-├── name
-└── region_id → 地区表
+```mermaid
+graph LR
+    A["用户表<br/>user_id<br/>name<br/>region_id"]
+    B["地区表<br/>region_id<br/>region_name"]
 
-优势：
-✓ 写入更快（单点更新）
-✓ 数据一致性
-✓ 节省存储空间
+    A -->|外键引用| B
 
-劣势：
-✗ 读取需要 JOIN
-✗ 查询复杂度增加
+    C["优势<br/>✓ 写入更快（单点更新）<br/>✓ 数据一致性<br/>✓ 节省存储空间"]
+    D["劣势<br/>✗ 读取需要 JOIN<br/>✗ 查询复杂度增加"]
+
+    style A fill:#90CAF9,stroke:#1565C0,stroke-width:2px
+    style B fill:#90CAF9,stroke:#1565C0,stroke-width:2px
+    style C fill:#A5D6A7,stroke:#2E7D32,stroke-width:2px
+    style D fill:#FFAB91,stroke:#D84315,stroke-width:2px
 ```
 
 #### 反规范化（Denormalization）
 
-```
-用户表
-├── user_id
-├── name
-└── region_name（直接存储）
+```mermaid
+graph LR
+    A["用户表<br/>user_id<br/>name<br/>region_name（直接存储）"]
 
-优势：
-✓ 读取更快（无需 JOIN）
-✓ 查询简单
+    B["优势<br/>✓ 读取更快（无需 JOIN）<br/>✓ 查询简单"]
+    C["劣势<br/>✗ 数据冗余<br/>✗ 更新复杂<br/>✗ 一致性风险"]
 
-劣势：
-✗ 数据冗余
-✗ 更新复杂
-✗ 一致性风险
+    style A fill:#FFE082,stroke:#FF8F00,stroke-width:2px
+    style B fill:#A5D6A7,stroke:#2E7D32,stroke-width:2px
+    style C fill:#FFAB91,stroke:#D84315,stroke-width:2px
 ```
 
 ### 模式灵活性对比
@@ -141,34 +127,38 @@ title: 第3章 数据模型与查询语言
 
 ### 图的基本组成
 
+```mermaid
+graph TD
+    A["图数据模型"]
+    B["顶点 Vertex<br/>• 唯一标识符<br/>• 标签(类型)<br/>• 属性(键值对)<br/>• 入边/出边"]
+    C["边 Edge<br/>• 唯一标识符<br/>• 起点/终点<br/>• 标签(关系类型)<br/>• 属性(键值对)"]
+
+    A --> B
+    A --> C
+    C -.连接.-> B
+
+    style A fill:#CE93D8,stroke:#6A1B9A,stroke-width:2px
+    style B fill:#90CAF9,stroke:#1565C0,stroke-width:2px
+    style C fill:#FFE082,stroke:#FF8F00,stroke-width:2px
 ```
-                    ┌─────────────────────────────────────────┐
-                    │              图数据模型                  │
-                    └─────────────────────────────────────────┘
-                                       │
-              ┌────────────────────────┴────────────────────────┐
-              │                                                 │
-              ▼                                                 ▼
-    ┌─────────────────┐                               ┌─────────────────┐
-    │   顶点 Vertex   │                               │    边 Edge      │
-    ├─────────────────┤                               ├─────────────────┤
-    │ • 唯一标识符    │                               │ • 唯一标识符    │
-    │ • 标签(类型)    │◀──────────────────────────────│ • 起点/终点     │
-    │ • 属性(键值对)  │                               │ • 标签(关系类型)│
-    │ • 入边/出边     │                               │ • 属性(键值对)  │
-    └─────────────────┘                               └─────────────────┘
 
-    示例：社交网络图
+**示例：社交网络图**
 
-         ┌─────────┐    FOLLOWS     ┌─────────┐
-         │  Alice  │───────────────▶│   Bob   │
-         └─────────┘                └─────────┘
-              │                          │
-              │ LIVES_IN                 │ BORN_IN
-              ▼                          ▼
-         ┌─────────┐                ┌─────────┐
-         │ Beijing │                │ Shanghai│
-         └─────────┘                └─────────┘
+```mermaid
+graph TD
+    Alice["Alice"]
+    Bob["Bob"]
+    Beijing["Beijing"]
+    Shanghai["Shanghai"]
+
+    Alice -->|FOLLOWS| Bob
+    Alice -->|LIVES_IN| Beijing
+    Bob -->|BORN_IN| Shanghai
+
+    style Alice fill:#90CAF9,stroke:#1565C0,stroke-width:2px
+    style Bob fill:#90CAF9,stroke:#1565C0,stroke-width:2px
+    style Beijing fill:#A5D6A7,stroke:#2E7D32,stroke-width:2px
+    style Shanghai fill:#A5D6A7,stroke:#2E7D32,stroke-width:2px
 ```
 
 ### 属性图示例
@@ -255,17 +245,28 @@ born_in_usa(Person, Name) :- born_in(Person, Location),
 
 ### 事件溯源（Event Sourcing）
 
-```
-传统方式：存储当前状态
-事件溯源：存储所有状态变更事件
+```mermaid
+graph TD
+    A["传统方式：存储当前状态"]
+    B["事件溯源：存储所有状态变更事件"]
 
-事件日志（不可变）
-├── 用户创建事件
-├── 用户更新邮箱事件
-├── 用户更新地址事件
-└── ...
-    ↓
-通过重放事件得到当前状态
+    C["事件日志（不可变）"]
+    D["用户创建事件"]
+    E["用户更新邮箱事件"]
+    F["用户更新地址事件"]
+    G["..."]
+    H["通过重放事件得到当前状态"]
+
+    C --> D --> E --> F --> G --> H
+
+    style A fill:#FFAB91,stroke:#D84315,stroke-width:2px
+    style B fill:#A5D6A7,stroke:#2E7D32,stroke-width:2px
+    style C fill:#90CAF9,stroke:#1565C0,stroke-width:2px
+    style D fill:#FFE082,stroke:#FF8F00,stroke-width:2px
+    style E fill:#FFE082,stroke:#FF8F00,stroke-width:2px
+    style F fill:#FFE082,stroke:#FF8F00,stroke-width:2px
+    style G fill:#FFE082,stroke:#FF8F00,stroke-width:2px
+    style H fill:#CE93D8,stroke:#6A1B9A,stroke-width:2px
 ```
 
 **优势**：
@@ -280,13 +281,24 @@ born_in_usa(Person, Name) :- born_in(Person, Location),
 
 ### CQRS（命令查询职责分离）
 
-```
-写入优化表示（事件日志）
-    ↓
-派生多个读取优化视图
-├── 视图 A：用户列表
-├── 视图 B：订单统计
-└── 视图 C：搜索索引
+```mermaid
+graph TD
+    A["写入优化表示<br/>事件日志"]
+    B["派生多个读取优化视图"]
+    C["视图 A：用户列表"]
+    D["视图 B：订单统计"]
+    E["视图 C：搜索索引"]
+
+    A --> B
+    B --> C
+    B --> D
+    B --> E
+
+    style A fill:#90CAF9,stroke:#1565C0,stroke-width:2px
+    style B fill:#CE93D8,stroke:#6A1B9A,stroke-width:2px
+    style C fill:#A5D6A7,stroke:#2E7D32,stroke-width:2px
+    style D fill:#A5D6A7,stroke:#2E7D32,stroke-width:2px
+    style E fill:#A5D6A7,stroke:#2E7D32,stroke-width:2px
 ```
 
 **核心思想**：
@@ -349,16 +361,33 @@ user_id | category_A | category_B
 
 ### 决策树
 
-```
-数据结构特征
-├── 树形结构、自包含文档
-│   └── 推荐：文档模型（MongoDB, CouchDB）
-├── 多对多关系较少、结构稳定
-│   └── 推荐：关系模型（PostgreSQL, MySQL）
-├── 多对多关系普遍、高度互联
-│   └── 推荐：图模型（Neo4j, JanusGraph）
-└── 时序数据、事件流
-    └── 推荐：事件溯源 + CQRS
+```mermaid
+graph TD
+    A["数据结构特征"]
+    B["树形结构、自包含文档"]
+    C["多对多关系较少、结构稳定"]
+    D["多对多关系普遍、高度互联"]
+    E["时序数据、事件流"]
+
+    F["推荐：文档模型<br/>MongoDB, CouchDB"]
+    G["推荐：关系模型<br/>PostgreSQL, MySQL"]
+    H["推荐：图模型<br/>Neo4j, JanusGraph"]
+    I["推荐：事件溯源 + CQRS"]
+
+    A --> B --> F
+    A --> C --> G
+    A --> D --> H
+    A --> E --> I
+
+    style A fill:#CE93D8,stroke:#6A1B9A,stroke-width:2px
+    style B fill:#90CAF9,stroke:#1565C0,stroke-width:2px
+    style C fill:#90CAF9,stroke:#1565C0,stroke-width:2px
+    style D fill:#90CAF9,stroke:#1565C0,stroke-width:2px
+    style E fill:#90CAF9,stroke:#1565C0,stroke-width:2px
+    style F fill:#A5D6A7,stroke:#2E7D32,stroke-width:2px
+    style G fill:#A5D6A7,stroke:#2E7D32,stroke-width:2px
+    style H fill:#A5D6A7,stroke:#2E7D32,stroke-width:2px
+    style I fill:#A5D6A7,stroke:#2E7D32,stroke-width:2px
 ```
 
 ### 关键考虑因素
@@ -376,41 +405,92 @@ user_id | category_A | category_B
 
 现代数据库越来越支持多模型：
 
-```
-PostgreSQL
-├── 关系表（传统 SQL）
-├── JSONB（文档模型）
-├── 递归 CTE（图查询）
-└── 数组和复合类型
+```mermaid
+graph TD
+    A["PostgreSQL"]
+    B["关系表<br/>传统 SQL"]
+    C["JSONB<br/>文档模型"]
+    D["递归 CTE<br/>图查询"]
+    E["数组和复合类型"]
+
+    A --> B
+    A --> C
+    A --> D
+    A --> E
+
+    style A fill:#90CAF9,stroke:#1565C0,stroke-width:2px
+    style B fill:#A5D6A7,stroke:#2E7D32,stroke-width:2px
+    style C fill:#FFE082,stroke:#FF8F00,stroke-width:2px
+    style D fill:#CE93D8,stroke:#6A1B9A,stroke-width:2px
+    style E fill:#FFAB91,stroke:#D84315,stroke-width:2px
 ```
 
 > 一个模型可以模拟另一个模型，但结果往往很笨拙。选择合适的数据模型对系统成功至关重要。
 
 ## 本章总结
 
-```
-数据模型与查询语言
-├── 关系模型
-│   ├── 优势：数据一致性、强大查询能力
-│   ├── 劣势：对象-关系阻抗失配
-│   └── 适用：结构稳定、多表关联
-├── 文档模型
-│   ├── 优势：模式灵活、局部性好
-│   ├── 劣势：JOIN 支持弱、数据冗余
-│   └── 适用：树形结构、自包含文档
-├── 图模型
-│   ├── 优势：多对多关系自然、路径查询强大
-│   ├── 劣势：学习曲线陡峭
-│   └── 适用：高度互联数据、社交网络
-├── 查询语言
-│   ├── SQL：声明式、成熟、标准化
-│   ├── Cypher：图查询直观、模式匹配
-│   ├── SPARQL：语义网、三元组
-│   └── Datalog：规则式、逻辑编程
-└── 高级模式
-    ├── 事件溯源：不可变事件日志
-    ├── CQRS：读写分离、多视图
-    └── 数据框：科学计算、机器学习
+```mermaid
+graph TD
+    A["数据模型与查询语言"]
+
+    B["关系模型"]
+    B1["优势：数据一致性、强大查询能力"]
+    B2["劣势：对象-关系阻抗失配"]
+    B3["适用：结构稳定、多表关联"]
+
+    C["文档模型"]
+    C1["优势：模式灵活、局部性好"]
+    C2["劣势：JOIN 支持弱、数据冗余"]
+    C3["适用：树形结构、自包含文档"]
+
+    D["图模型"]
+    D1["优势：多对多关系自然、路径查询强大"]
+    D2["劣势：学习曲线陡峭"]
+    D3["适用：高度互联数据、社交网络"]
+
+    E["查询语言"]
+    E1["SQL：声明式、成熟、标准化"]
+    E2["Cypher：图查询直观、模式匹配"]
+    E3["SPARQL：语义网、三元组"]
+    E4["Datalog：规则式、逻辑编程"]
+
+    F["高级模式"]
+    F1["事件溯源：不可变事件日志"]
+    F2["CQRS：读写分离、多视图"]
+    F3["数据框：科学计算、机器学习"]
+
+    A --> B
+    B --> B1
+    B --> B2
+    B --> B3
+
+    A --> C
+    C --> C1
+    C --> C2
+    C --> C3
+
+    A --> D
+    D --> D1
+    D --> D2
+    D --> D3
+
+    A --> E
+    E --> E1
+    E --> E2
+    E --> E3
+    E --> E4
+
+    A --> F
+    F --> F1
+    F --> F2
+    F --> F3
+
+    style A fill:#CE93D8,stroke:#6A1B9A,stroke-width:2px
+    style B fill:#90CAF9,stroke:#1565C0,stroke-width:2px
+    style C fill:#FFE082,stroke:#FF8F00,stroke-width:2px
+    style D fill:#A5D6A7,stroke:#2E7D32,stroke-width:2px
+    style E fill:#FFAB91,stroke:#D84315,stroke-width:2px
+    style F fill:#CE93D8,stroke:#6A1B9A,stroke-width:2px
 ```
 
 **核心原则**：

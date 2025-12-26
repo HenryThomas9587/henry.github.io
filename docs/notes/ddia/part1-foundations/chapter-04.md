@@ -31,35 +31,28 @@ createTime: 2025-12-26
 
 SSTable 是按键排序的键值对文件格式，相比简单日志文件的优势：
 
-```
-                        LSM-Tree 写入流程
-                              │
-                              ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                         内存 (Memtable)                          │
-│  ┌─────────────────────────────────────────────────────────┐    │
-│  │  红黑树/跳表 (按键排序)                                   │    │
-│  │  key1 → value1                                          │    │
-│  │  key2 → value2                                          │    │
-│  │  key3 → value3                                          │    │
-│  └─────────────────────────────────────────────────────────┘    │
-└─────────────────────────────────────────────────────────────────┘
-                              │ 达到阈值后刷盘
-                              ▼
-┌─────────────────────────────────────────────────────────────────┐
-│                         磁盘 (SSTables)                          │
-│                                                                 │
-│  Level 0:  [SSTable] [SSTable] [SSTable]  ← 新写入              │
-│                 │         │         │                           │
-│                 └─────────┴─────────┘                           │
-│                           │ 压缩合并                             │
-│                           ▼                                     │
-│  Level 1:  [    SSTable    ] [    SSTable    ]                  │
-│                           │                                     │
-│                           ▼                                     │
-│  Level 2:  [         SSTable         ] [         SSTable    ]   │
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    subgraph Memory["内存 (Memtable)"]
+        MT["红黑树/跳表 (按键排序)<br/>key1 → value1<br/>key2 → value2<br/>key3 → value3"]
+    end
+
+    subgraph Disk["磁盘 (SSTables)"]
+        L0["Level 0: SSTable | SSTable | SSTable"]
+        L1["Level 1: SSTable | SSTable"]
+        L2["Level 2: SSTable | SSTable"]
+    end
+
+    MT -->|达到阈值后刷盘| L0
+    L0 -->|压缩合并| L1
+    L1 -->|压缩合并| L2
+
+    style Memory fill:#E3F2FD,stroke:#1565C0,stroke-width:2px
+    style Disk fill:#FFF3E0,stroke:#FF8F00,stroke-width:2px
+    style MT fill:#90CAF9,stroke:#1565C0,stroke-width:2px
+    style L0 fill:#FFE082,stroke:#FF8F00,stroke-width:2px
+    style L1 fill:#FFE082,stroke:#FF8F00,stroke-width:2px
+    style L2 fill:#FFE082,stroke:#FF8F00,stroke-width:2px
 ```
 
 **核心特性**：
@@ -95,28 +88,46 @@ LSM-Tree 是基于 SSTable 的完整存储引擎实现。
 
 B-Tree 采用固定大小页面的就地更新策略，是最广泛使用的索引结构。
 
-```
-                           B-Tree 结构示意图
+```mermaid
+graph TD
+    Root["根节点 (Root)<br/>[10] [20] [30]"]
 
-                         ┌───────────────────┐
-                         │    根节点 (Root)   │
-                         │   [10] [20] [30]  │
-                         └─────────┬─────────┘
-                    ┌──────────────┼──────────────┐
-                    ▼              ▼              ▼
-           ┌─────────────┐ ┌─────────────┐ ┌─────────────┐
-           │  [3] [7]    │ │ [12] [17]   │ │ [25] [28]   │
-           └──────┬──────┘ └──────┬──────┘ └──────┬──────┘
-              ┌───┴───┐       ┌───┴───┐       ┌───┴───┐
-              ▼       ▼       ▼       ▼       ▼       ▼
-           ┌─────┐ ┌─────┐ ┌─────┐ ┌─────┐ ┌─────┐ ┌─────┐
-           │1,2,3│ │5,6,7│ │11,12│ │15,17│ │22,25│ │27,28│
-           └─────┘ └─────┘ └─────┘ └─────┘ └─────┘ └─────┘
-              叶子节点 (存储实际数据或指向数据的指针)
+    B1["[3] [7]"]
+    B2["[12] [17]"]
+    B3["[25] [28]"]
 
-    查找 key=15 的路径: Root → [12,17] → [15,17] → 找到!
-    时间复杂度: O(log n)
+    L1["1,2,3"]
+    L2["5,6,7"]
+    L3["11,12"]
+    L4["15,17"]
+    L5["22,25"]
+    L6["27,28"]
+
+    Root --> B1
+    Root --> B2
+    Root --> B3
+
+    B1 --> L1
+    B1 --> L2
+    B2 --> L3
+    B2 --> L4
+    B3 --> L5
+    B3 --> L6
+
+    style Root fill:#90CAF9,stroke:#1565C0,stroke-width:2px
+    style B1 fill:#FFE082,stroke:#FF8F00,stroke-width:2px
+    style B2 fill:#FFE082,stroke:#FF8F00,stroke-width:2px
+    style B3 fill:#FFE082,stroke:#FF8F00,stroke-width:2px
+    style L1 fill:#A5D6A7,stroke:#2E7D32,stroke-width:2px
+    style L2 fill:#A5D6A7,stroke:#2E7D32,stroke-width:2px
+    style L3 fill:#A5D6A7,stroke:#2E7D32,stroke-width:2px
+    style L4 fill:#A5D6A7,stroke:#2E7D32,stroke-width:2px
+    style L5 fill:#A5D6A7,stroke:#2E7D32,stroke-width:2px
+    style L6 fill:#A5D6A7,stroke:#2E7D32,stroke-width:2px
 ```
+
+**查找示例**：查找 key=15 的路径: Root → [12,17] → [15,17] → 找到!
+**时间复杂度**：O(log n)
 
 **核心特性**：
 - 页面大小：通常 4KB-16KB
@@ -131,31 +142,45 @@ B-Tree 采用固定大小页面的就地更新策略，是最广泛使用的索�
 
 ### LSM-Tree vs B-Tree 对比
 
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│                    LSM-Tree vs B-Tree                               │
-├─────────────────────────────────────────────────────────────────────┤
-│                                                                     │
-│   LSM-Tree                           B-Tree                         │
-│   ┌─────────────┐                    ┌─────────────┐               │
-│   │  Memtable   │ ← 写入             │    Root     │               │
-│   └──────┬──────┘                    └──────┬──────┘               │
-│          ▼                                  │                       │
-│   ┌─────────────┐                    ┌──────┴──────┐               │
-│   │  SSTable L0 │                    ▼             ▼               │
-│   └──────┬──────┘               ┌────────┐   ┌────────┐            │
-│          ▼                      │ Branch │   │ Branch │            │
-│   ┌─────────────┐               └────┬───┘   └────┬───┘            │
-│   │  SSTable L1 │                    ▼             ▼               │
-│   └──────┬──────┘               ┌────────┐   ┌────────┐            │
-│          ▼                      │  Leaf  │   │  Leaf  │ ← 就地更新 │
-│   ┌─────────────┐               └────────┘   └────────┘            │
-│   │  SSTable L2 │                                                   │
-│   └─────────────┘                                                   │
-│                                                                     │
-│   顺序写入 + 后台压缩              随机写入 + 页面分裂               │
-│                                                                     │
-└─────────────────────────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    subgraph LSM["LSM-Tree"]
+        direction TB
+        LM["Memtable<br/>写入"]
+        LL0["SSTable L0"]
+        LL1["SSTable L1"]
+        LL2["SSTable L2"]
+        LM --> LL0
+        LL0 --> LL1
+        LL1 --> LL2
+        LNote["顺序写入 + 后台压缩"]
+    end
+
+    subgraph BT["B-Tree"]
+        direction TB
+        BR["Root"]
+        BB1["Branch"]
+        BB2["Branch"]
+        BL1["Leaf<br/>就地更新"]
+        BL2["Leaf<br/>就地更新"]
+        BR --> BB1
+        BR --> BB2
+        BB1 --> BL1
+        BB2 --> BL2
+        BNote["随机写入 + 页面分裂"]
+    end
+
+    style LSM fill:#E3F2FD,stroke:#1565C0,stroke-width:2px
+    style BT fill:#FFF3E0,stroke:#FF8F00,stroke-width:2px
+    style LM fill:#90CAF9,stroke:#1565C0,stroke-width:2px
+    style LL0 fill:#90CAF9,stroke:#1565C0,stroke-width:2px
+    style LL1 fill:#90CAF9,stroke:#1565C0,stroke-width:2px
+    style LL2 fill:#90CAF9,stroke:#1565C0,stroke-width:2px
+    style BR fill:#FFE082,stroke:#FF8F00,stroke-width:2px
+    style BB1 fill:#FFE082,stroke:#FF8F00,stroke-width:2px
+    style BB2 fill:#FFE082,stroke:#FF8F00,stroke-width:2px
+    style BL1 fill:#FFE082,stroke:#FF8F00,stroke-width:2px
+    style BL2 fill:#FFE082,stroke:#FF8F00,stroke-width:2px
 ```
 
 | 维度 | LSM-Tree | B-Tree |
@@ -301,22 +326,53 @@ B-Tree 采用固定大小页面的就地更新策略，是最广泛使用的索�
 
 ### 选择决策树
 
-```
-存储引擎选择
-├── OLTP 工作负载
-│   ├── 写密集型
-│   │   ├── 顺序写入优先 → LSM-Tree (RocksDB, Cassandra)
-│   │   └── 需要事务支持 → B-Tree (PostgreSQL, MySQL InnoDB)
-│   └── 读密集型
-│       ├── 点查询为主 → B-Tree
-│       └── 范围查询多 → LSM-Tree 或 B-Tree 均可
-├── OLAP 工作负载
-│   ├── 交互式查询 → 列式存储 (ClickHouse, Druid)
-│   ├── 批处理分析 → Parquet + Spark
-│   └── 云环境 → 云数据仓库 (Snowflake, BigQuery, Redshift)
-└── 混合工作负载
-    ├── HTAP 数据库 → TiDB, CockroachDB
-    └── 分离架构 → OLTP + 数据仓库
+```mermaid
+flowchart TD
+    Start["存储引擎选择"]
+
+    Start --> OLTP["OLTP 工作负载"]
+    Start --> OLAP["OLAP 工作负载"]
+    Start --> Hybrid["混合工作负载"]
+
+    OLTP --> WriteIntensive["写密集型"]
+    OLTP --> ReadIntensive["读密集型"]
+
+    WriteIntensive --> SeqWrite["顺序写入优先"]
+    WriteIntensive --> TxSupport["需要事务支持"]
+
+    SeqWrite --> LSM["LSM-Tree<br/>(RocksDB, Cassandra)"]
+    TxSupport --> BTree1["B-Tree<br/>(PostgreSQL, MySQL InnoDB)"]
+
+    ReadIntensive --> PointQuery["点查询为主"]
+    ReadIntensive --> RangeQuery["范围查询多"]
+
+    PointQuery --> BTree2["B-Tree"]
+    RangeQuery --> Both["LSM-Tree 或 B-Tree 均可"]
+
+    OLAP --> Interactive["交互式查询"]
+    OLAP --> Batch["批处理分析"]
+    OLAP --> Cloud["云环境"]
+
+    Interactive --> Columnar["列式存储<br/>(ClickHouse, Druid)"]
+    Batch --> ParquetSpark["Parquet + Spark"]
+    Cloud --> CloudDW["云数据仓库<br/>(Snowflake, BigQuery, Redshift)"]
+
+    Hybrid --> HTAP["HTAP 数据库<br/>(TiDB, CockroachDB)"]
+    Hybrid --> Separate["分离架构<br/>(OLTP + 数据仓库)"]
+
+    style Start fill:#CE93D8,stroke:#6A1B9A,stroke-width:2px
+    style OLTP fill:#90CAF9,stroke:#1565C0,stroke-width:2px
+    style OLAP fill:#FFE082,stroke:#FF8F00,stroke-width:2px
+    style Hybrid fill:#A5D6A7,stroke:#2E7D32,stroke-width:2px
+    style LSM fill:#FFAB91,stroke:#D84315,stroke-width:2px
+    style BTree1 fill:#FFAB91,stroke:#D84315,stroke-width:2px
+    style BTree2 fill:#FFAB91,stroke:#D84315,stroke-width:2px
+    style Both fill:#FFAB91,stroke:#D84315,stroke-width:2px
+    style Columnar fill:#FFAB91,stroke:#D84315,stroke-width:2px
+    style ParquetSpark fill:#FFAB91,stroke:#D84315,stroke-width:2px
+    style CloudDW fill:#FFAB91,stroke:#D84315,stroke-width:2px
+    style HTAP fill:#FFAB91,stroke:#D84315,stroke-width:2px
+    style Separate fill:#FFAB91,stroke:#D84315,stroke-width:2px
 ```
 
 ## 性能调优要点
@@ -359,48 +415,53 @@ B-Tree 采用固定大小页面的就地更新策略，是最广泛使用的索�
 
 ## 本章总结
 
-```
-第4章：存储与检索
-│
-├── 核心权衡
-│   ├── 读性能 vs 写性能
-│   ├── 存储空间 vs 查询速度
-│   └── 简单性 vs 功能性
-│
-├── OLTP 存储引擎
-│   ├── 日志结构
-│   │   ├── SSTable
-│   │   ├── LSM-Tree
-│   │   ├── 压缩策略（Size-tiered, Leveled）
-│   │   └── 布隆过滤器
-│   ├── 页面导向
-│   │   ├── B-Tree
-│   │   ├── 预写日志（WAL）
-│   │   └── Copy-on-write
-│   └── 索引类型
-│       ├── 主键索引 vs 二级索引
-│       ├── 聚簇索引 vs 非聚簇索引
-│       └── 多维索引（R-Tree, 倒排索引, 向量索引）
-│
-├── OLAP 存储引擎
-│   ├── 列式存储
-│   │   ├── 按列组织数据
-│   │   ├── 压缩技术（位图、游程、字典）
-│   │   └── 向量化处理
-│   ├── 数据仓库架构
-│   │   ├── 星型模式 / 雪花模式
-│   │   ├── 计算存储分离
-│   │   └── 模块化组件生态
-│   └── 查询优化
-│       ├── 物化视图
-│       ├── 数据立方体
-│       └── 查询编译
-│
-└── 关键洞察
-    ├── 没有万能的存储引擎
-    ├── 工作负载特征决定选择
-    ├── 理解内部机制才能有效调优
-    └── 云原生架构趋向模块化和弹性
+```mermaid
+mindmap
+  root((第4章<br/>存储与检索))
+    核心权衡
+      读性能 vs 写性能
+      存储空间 vs 查询速度
+      简单性 vs 功能性
+    OLTP 存储引擎
+      日志结构
+        SSTable
+        LSM-Tree
+        压缩策略
+          Size-tiered
+          Leveled
+        布隆过滤器
+      页面导向
+        B-Tree
+        预写日志 WAL
+        Copy-on-write
+      索引类型
+        主键索引 vs 二级索引
+        聚簇索引 vs 非聚簇索引
+        多维索引
+          R-Tree
+          倒排索引
+          向量索引
+    OLAP 存储引擎
+      列式存储
+        按列组织数据
+        压缩技术
+          位图
+          游程
+          字典
+        向量化处理
+      数据仓库架构
+        星型模式 / 雪花模式
+        计算存储分离
+        模块化组件生态
+      查询优化
+        物化视图
+        数据立方体
+        查询编译
+    关键洞察
+      没有万能的存储引擎
+      工作负载特征决定选择
+      理解内部机制才能有效调优
+      云原生架构趋向模块化和弹性
 ```
 
 ## 延伸思考
