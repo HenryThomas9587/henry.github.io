@@ -11,33 +11,72 @@ permalink: /ddia/dxwd3178/
 ## 章节概览
 
 ```mermaid
-mindmap
-  root((第5章<br/>编码与演化))
-    编码格式
-      语言特定格式<br/>(不推荐)
-      文本格式<br/>(JSON/XML/CSV)
-      二进制模式驱动格式
-        Protocol Buffers<br/>(标签号)
-        Thrift<br/>(标签号)
-        Avro<br/>(字段名 + 模式解析)
-    模式演化
-      向后兼容<br/>(新读旧)
-      向前兼容<br/>(旧读新)
-      演化规则<br/>(添加/删除/修改字段)
-    数据流模式
-      数据库<br/>(数据长期存在)
-      服务<br/>(REST/RPC)
-        负载均衡
-        服务网格
-        API 版本控制
-      工作流系统<br/>(持久化执行)
-      事件驱动
-        消息代理<br/>(队列/主题)
-        Actor 框架
-    演化策略
-      滚动升级
-      模式兼容性检查
-      渐进式迁移
+graph LR
+    Root[第5章<br/>编码与演化]
+
+    Root --> Format[编码格式]
+    Root --> Evolution[模式演化]
+    Root --> DataFlow[数据流模式]
+    Root --> Strategy[演化策略]
+
+    Format --> F1[语言特定格式<br/>不推荐]
+    Format --> F2[文本格式<br/>JSON/XML/CSV]
+    Format --> F3[二进制模式驱动]
+
+    F3 --> F3a[Protocol Buffers<br/>标签号]
+    F3 --> F3b[Thrift<br/>标签号]
+    F3 --> F3c[Avro<br/>字段名+模式解析]
+
+    Evolution --> E1[向后兼容<br/>新读旧]
+    Evolution --> E2[向前兼容<br/>旧读新]
+    Evolution --> E3[演化规则<br/>添加/删除/修改字段]
+
+    DataFlow --> D1[数据库<br/>数据长期存在]
+    DataFlow --> D2[服务<br/>REST/RPC]
+    DataFlow --> D3[工作流系统<br/>持久化执行]
+    DataFlow --> D4[事件驱动]
+
+    D2 --> D2a[负载均衡]
+    D2 --> D2b[服务网格]
+    D2 --> D2c[API版本控制]
+
+    D4 --> D4a[消息代理<br/>队列/主题]
+    D4 --> D4b[Actor框架]
+
+    Strategy --> S1[滚动升级]
+    Strategy --> S2[模式兼容性检查]
+    Strategy --> S3[渐进式迁移]
+
+    style Root fill:#CE93D8,stroke:#6A1B9A,stroke-width:3px
+    style Format fill:#90CAF9,stroke:#1565C0,stroke-width:2px
+    style Evolution fill:#A5D6A7,stroke:#2E7D32,stroke-width:2px
+    style DataFlow fill:#FFE082,stroke:#FF8F00,stroke-width:2px
+    style Strategy fill:#FFAB91,stroke:#D84315,stroke-width:2px
+
+    style F1 fill:#B3E5FC,stroke:#0277BD,stroke-width:1px
+    style F2 fill:#B3E5FC,stroke:#0277BD,stroke-width:1px
+    style F3 fill:#B3E5FC,stroke:#0277BD,stroke-width:1px
+    style F3a fill:#E1F5FE,stroke:#01579B,stroke-width:1px
+    style F3b fill:#E1F5FE,stroke:#01579B,stroke-width:1px
+    style F3c fill:#E1F5FE,stroke:#01579B,stroke-width:1px
+
+    style E1 fill:#C8E6C9,stroke:#388E3C,stroke-width:1px
+    style E2 fill:#C8E6C9,stroke:#388E3C,stroke-width:1px
+    style E3 fill:#C8E6C9,stroke:#388E3C,stroke-width:1px
+
+    style D1 fill:#FFF9C4,stroke:#F57F17,stroke-width:1px
+    style D2 fill:#FFF9C4,stroke:#F57F17,stroke-width:1px
+    style D3 fill:#FFF9C4,stroke:#F57F17,stroke-width:1px
+    style D4 fill:#FFF9C4,stroke:#F57F17,stroke-width:1px
+    style D2a fill:#FFFDE7,stroke:#F9A825,stroke-width:1px
+    style D2b fill:#FFFDE7,stroke:#F9A825,stroke-width:1px
+    style D2c fill:#FFFDE7,stroke:#F9A825,stroke-width:1px
+    style D4a fill:#FFFDE7,stroke:#F9A825,stroke-width:1px
+    style D4b fill:#FFFDE7,stroke:#F9A825,stroke-width:1px
+
+    style S1 fill:#FFCCBC,stroke:#BF360C,stroke-width:1px
+    style S2 fill:#FFCCBC,stroke:#BF360C,stroke-width:1px
+    style S3 fill:#FFCCBC,stroke:#BF360C,stroke-width:1px
 ```
 
 ## 核心概念
@@ -136,7 +175,7 @@ graph LR
 - 需要手动分配唯一标签号
 
 **模式演化规则**：
-- 可以���加新字段（使用新标签号）
+- 可以添加新字段（使用新标签号）
 - 可以删除字段（但不能重用标签号）
 - 不能更改字段的数据类型
 
@@ -297,7 +336,7 @@ message Person {
 
 ### 事件驱动架构
 
-#### 消息代���
+#### 消息代理
 
 **相比直接 RPC 的优势**：
 - 缓冲机制提高可靠性

@@ -7,52 +7,113 @@ title: 第4章 存储与检索
 ## 章节概览
 
 ```mermaid
-mindmap
-  root((第4章<br/>存储与检索))
-    核心权衡
-      读性能 vs 写性能
-      存储空间 vs 查询速度
-      简单性 vs 功能性
-    OLTP 存储引擎
-      日志结构
-        SSTable
-        LSM-Tree
-        压缩策略
-          Size-tiered
-          Leveled
-        布隆过滤器
-      页面导向
-        B-Tree
-        预写日志 WAL
-        Copy-on-write
-      索引类型
-        主键索引 vs 二级索引
-        聚簇索引 vs 非聚簇索引
-        多维索引
-          R-Tree
-          倒排索引
-          向量索引
-    OLAP 存储引擎
-      列式存储
-        按列组织数据
-        压缩技术
-          位图
-          游程
-          字典
-        向量化处理
-      数据仓库架构
-        星型模式 / 雪花模式
-        计算存储分离
-        模块化组件生态
-      查询优化
-        物化视图
-        数据立方体
-        查询编译
-    关键洞察
-      没有万能的存储引擎
-      工作负载特征决定选择
-      理解内部机制才能有效调优
-      云原生架构趋向模块化和弹性
+graph LR
+    Root[第4章<br/>存储与检索]
+
+    Root --> Tradeoff[核心权衡]
+    Root --> OLTP[OLTP存储引擎]
+    Root --> OLAP[OLAP存储引擎]
+    Root --> Insight[关键洞察]
+
+    Tradeoff --> T1[读性能 vs 写性能]
+    Tradeoff --> T2[存储空间 vs 查询速度]
+    Tradeoff --> T3[简单性 vs 功能性]
+
+    OLTP --> Log[日志结构]
+    OLTP --> Page[页面导向]
+    OLTP --> Index[索引类型]
+
+    Log --> L1[SSTable]
+    Log --> L2[LSM-Tree]
+    Log --> L3[压缩策略]
+    Log --> L4[布隆过滤器]
+    L3 --> L3a[Size-tiered]
+    L3 --> L3b[Leveled]
+
+    Page --> P1[B-Tree]
+    Page --> P2[预写日志 WAL]
+    Page --> P3[Copy-on-write]
+
+    Index --> I1[主键索引 vs<br/>二级索引]
+    Index --> I2[聚簇索引 vs<br/>非聚簇索引]
+    Index --> I3[多维索引]
+    I3 --> I3a[R-Tree]
+    I3 --> I3b[倒排索引]
+    I3 --> I3c[向量索引]
+
+    OLAP --> Col[列式存储]
+    OLAP --> Warehouse[数据仓库架构]
+    OLAP --> Query[查询优化]
+
+    Col --> C1[按列组织数据]
+    Col --> C2[压缩技术]
+    Col --> C3[向量化处理]
+    C2 --> C2a[位图]
+    C2 --> C2b[游程]
+    C2 --> C2c[字典]
+
+    Warehouse --> W1[星型模式/<br/>雪花模式]
+    Warehouse --> W2[计算存储分离]
+    Warehouse --> W3[模块化组件生态]
+
+    Query --> Q1[物化视图]
+    Query --> Q2[数据立方体]
+    Query --> Q3[查询编译]
+
+    Insight --> In1[没有万能的<br/>存储引擎]
+    Insight --> In2[工作负载特征<br/>决定选择]
+    Insight --> In3[理解内部机制<br/>才能有效调优]
+    Insight --> In4[云原生架构趋向<br/>模块化和弹性]
+
+    style Root fill:#CE93D8,stroke:#6A1B9A,stroke-width:3px
+    style Tradeoff fill:#90CAF9,stroke:#1565C0,stroke-width:2px
+    style OLTP fill:#A5D6A7,stroke:#2E7D32,stroke-width:2px
+    style OLAP fill:#FFE082,stroke:#FF8F00,stroke-width:2px
+    style Insight fill:#FFAB91,stroke:#D84315,stroke-width:2px
+
+    style T1 fill:#B3E5FC,stroke:#0277BD,stroke-width:1px
+    style T2 fill:#B3E5FC,stroke:#0277BD,stroke-width:1px
+    style T3 fill:#B3E5FC,stroke:#0277BD,stroke-width:1px
+
+    style Log fill:#C8E6C9,stroke:#388E3C,stroke-width:1px
+    style Page fill:#C8E6C9,stroke:#388E3C,stroke-width:1px
+    style Index fill:#C8E6C9,stroke:#388E3C,stroke-width:1px
+    style L1 fill:#E8F5E9,stroke:#4CAF50,stroke-width:1px
+    style L2 fill:#E8F5E9,stroke:#4CAF50,stroke-width:1px
+    style L3 fill:#E8F5E9,stroke:#4CAF50,stroke-width:1px
+    style L4 fill:#E8F5E9,stroke:#4CAF50,stroke-width:1px
+    style L3a fill:#F1F8E9,stroke:#7CB342,stroke-width:1px
+    style L3b fill:#F1F8E9,stroke:#7CB342,stroke-width:1px
+    style P1 fill:#E8F5E9,stroke:#4CAF50,stroke-width:1px
+    style P2 fill:#E8F5E9,stroke:#4CAF50,stroke-width:1px
+    style P3 fill:#E8F5E9,stroke:#4CAF50,stroke-width:1px
+    style I1 fill:#E8F5E9,stroke:#4CAF50,stroke-width:1px
+    style I2 fill:#E8F5E9,stroke:#4CAF50,stroke-width:1px
+    style I3 fill:#E8F5E9,stroke:#4CAF50,stroke-width:1px
+    style I3a fill:#F1F8E9,stroke:#7CB342,stroke-width:1px
+    style I3b fill:#F1F8E9,stroke:#7CB342,stroke-width:1px
+    style I3c fill:#F1F8E9,stroke:#7CB342,stroke-width:1px
+
+    style Col fill:#FFF9C4,stroke:#F57F17,stroke-width:1px
+    style Warehouse fill:#FFF9C4,stroke:#F57F17,stroke-width:1px
+    style Query fill:#FFF9C4,stroke:#F57F17,stroke-width:1px
+    style C1 fill:#FFFDE7,stroke:#F9A825,stroke-width:1px
+    style C2 fill:#FFFDE7,stroke:#F9A825,stroke-width:1px
+    style C3 fill:#FFFDE7,stroke:#F9A825,stroke-width:1px
+    style C2a fill:#FFFEF0,stroke:#FBC02D,stroke-width:1px
+    style C2b fill:#FFFEF0,stroke:#FBC02D,stroke-width:1px
+    style C2c fill:#FFFEF0,stroke:#FBC02D,stroke-width:1px
+    style W1 fill:#FFFDE7,stroke:#F9A825,stroke-width:1px
+    style W2 fill:#FFFDE7,stroke:#F9A825,stroke-width:1px
+    style W3 fill:#FFFDE7,stroke:#F9A825,stroke-width:1px
+    style Q1 fill:#FFFDE7,stroke:#F9A825,stroke-width:1px
+    style Q2 fill:#FFFDE7,stroke:#F9A825,stroke-width:1px
+    style Q3 fill:#FFFDE7,stroke:#F9A825,stroke-width:1px
+
+    style In1 fill:#FFCCBC,stroke:#BF360C,stroke-width:1px
+    style In2 fill:#FFCCBC,stroke:#BF360C,stroke-width:1px
+    style In3 fill:#FFCCBC,stroke:#BF360C,stroke-width:1px
+    style In4 fill:#FFCCBC,stroke:#BF360C,stroke-width:1px
 ```
 
 本章深入探讨数据库如何存储和检索数据，重点分析面向事务处理（OLTP）和分析处理（OLAP）两类工作负载的存储引擎架构及其基本权衡。理解存储引擎内部机制有助于选择合适的数据库并有效调优性能参数。
