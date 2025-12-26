@@ -8,10 +8,11 @@ export const zhNavbar = defineNavbarConfig([
   {
     text: "笔记",
     items: [
-      { text: "示例", link: "/notes/demo/README.md" },
       { text: "Android", link: "/notes/android/README.md" },
+      { text: "DDIA 学习笔记", link: "/notes/ddia/README.md" },
+      { text: "Demo", link: "/notes/demo/README.md" },
       { text: "Flutter", link: "/notes/flutter/README.md" },
-      { text: "Flutter", link: "/notes/flutter/README.md" },
+      { text: "Ui", link: "/notes/ui/README.md" },
     ],
   },
 ]);
@@ -24,8 +25,8 @@ export const enNavbar = defineNavbarConfig([
   {
     text: "Notes",
     items: [
-      { text: "Demo", link: "/en/notes/demo/README.md" },
       { text: "Android", link: "/en/notes/android/README.md" },
+      { text: "Demo", link: "/en/notes/demo/README.md" },
       { text: "Flutter", link: "/en/notes/flutter/README.md" },
     ],
   },

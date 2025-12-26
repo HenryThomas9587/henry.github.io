@@ -2,15 +2,21 @@ import { defineNoteConfig, defineNotesConfig } from "vuepress-theme-plume";
 
 /* =================== locale: zh-CN ======================= */
 
-const zhDemoNote = defineNoteConfig({
-  dir: "demo",
-  link: "/demo",
-  sidebar: ["", "foo", "bar"],
-});
-
 const zhAndroidNote = defineNoteConfig({
   dir: "android",
   link: "/android",
+  sidebar: "auto",
+});
+
+const zhDdiaNote = defineNoteConfig({
+  dir: "ddia",
+  link: "/ddia",
+  sidebar: "auto",
+});
+
+const zhDemoNote = defineNoteConfig({
+  dir: "demo",
+  link: "/demo",
   sidebar: "auto",
 });
 
@@ -20,34 +26,52 @@ const zhFlutterNote = defineNoteConfig({
   sidebar: "auto",
 });
 
+const zhUiNote = defineNoteConfig({
+  dir: "ui",
+  link: "/ui",
+  sidebar: "auto",
+});
+
 export const zhNotes = defineNotesConfig({
   dir: "notes",
   link: "/",
-  notes: [zhDemoNote, zhAndroidNote, zhFlutterNote],
+  notes: [zhAndroidNote, zhDdiaNote, zhDemoNote, zhFlutterNote, zhUiNote],
 });
 
 /* =================== locale: en-US ======================= */
 
-const enDemoNote = defineNoteConfig({
-  dir: "demo",
-  link: "/demo",
-  sidebar: ["", "foo", "bar"],
-});
-
 const enAndroidNote = defineNoteConfig({
   dir: "android",
   link: "/android",
-  sidebar: ["", "test1", "test2"],
+  sidebar: "auto",
+});
+
+const enDdiaNote = defineNoteConfig({
+  dir: "ddia",
+  link: "/ddia",
+  sidebar: "auto",
+});
+
+const enDemoNote = defineNoteConfig({
+  dir: "demo",
+  link: "/demo",
+  sidebar: "auto",
 });
 
 const enFlutterNote = defineNoteConfig({
   dir: "flutter",
   link: "/flutter",
-  sidebar: ["", "test1", "test2"],
+  sidebar: "auto",
+});
+
+const enUiNote = defineNoteConfig({
+  dir: "ui",
+  link: "/ui",
+  sidebar: "auto",
 });
 
 export const enNotes = defineNotesConfig({
   dir: "en/notes",
   link: "/en/",
-  notes: [enDemoNote, enAndroidNote, enFlutterNote],
+  notes: [enAndroidNote, enDdiaNote, enDemoNote, enFlutterNote, enUiNote],
 });
