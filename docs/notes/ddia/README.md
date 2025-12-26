@@ -18,13 +18,15 @@ Designing Data-Intensive Applications (DDIA) 第二版学习笔记。
 | [第4章](part1-foundations/chapter-04.md) | 存储与检索 |
 | [第5章](part1-foundations/chapter-05.md) | 编码与演化 |
 
-### 第二部分：分布式数据（待更新）
+### [第二部分：分布式数据](part2-distributed/README.md)
 
-- 第6章：复制
-- 第7章：分区
-- 第8章：事务
-- 第9章：分布式系统的麻烦
-- 第10章：一致性与共识
+| 章节 | 主题 |
+|------|------|
+| [第6章](part2-distributed/chapter-06.md) | 复制 |
+| [第7章](part2-distributed/chapter-07.md) | 分区 |
+| [第8章](part2-distributed/chapter-08.md) | 事务 |
+| [第9章](part2-distributed/chapter-09.md) | 分布式系统的麻烦 |
+| [第10章](part2-distributed/chapter-10.md) | 一致性与共识 |
 
 ### 第三部分：派生数据（待更新）
 
