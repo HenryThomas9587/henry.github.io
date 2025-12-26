@@ -20,23 +20,45 @@ jobs:
           # "Last updated time" and other git log-related information require fetching all commit records.
           fetch-depth: 0
 
+      # 安装 pnpm
+      # Install pnpm
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           # 选择要使用的 node 版本
           node-version: 20
+          # 启用 pnpm 缓存
+          # Enable pnpm cache
+          cache: 'pnpm'
 
       # 安装依赖
       # Install dependencies
       - name: Install Dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
+
+      # 缓存 VuePress 构建产物
+      # Cache VuePress build artifacts
+      - name: Cache VuePress
+        uses: actions/cache@v4
+        with:
+          path: |
+            docs/.vuepress/.cache
+            docs/.vuepress/.temp
+          key: ${{ runner.os }}-vuepress-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-vuepress-
 
 
 
       # 运行构建脚本
       # Run the build script
       - name: Build VuePress site
-        run: npm run docs:build
+        run: pnpm run docs:build
 
 
       # 查看 workflow 的文档来获取更多信息
