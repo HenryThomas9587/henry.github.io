@@ -6,6 +6,38 @@ title: 第5章 编码与演化
 
 > 本章基于 [DDIA 中文翻译](https://ddia.vonng.com/ch5/) 整理
 
+## 章节概览
+
+```mermaid
+mindmap
+  root((第5章<br/>编码与演化))
+    编码格式
+      语言特定格式<br/>(不推荐)
+      文本格式<br/>(JSON/XML/CSV)
+      二进制模式驱动格式
+        Protocol Buffers<br/>(标签号)
+        Thrift<br/>(标签号)
+        Avro<br/>(字段名 + 模式解析)
+    模式演化
+      向后兼容<br/>(新读旧)
+      向前兼容<br/>(旧读新)
+      演化规则<br/>(添加/删除/修改字段)
+    数据流模式
+      数据库<br/>(数据长期存在)
+      服务<br/>(REST/RPC)
+        负载均衡
+        服务网格
+        API 版本控制
+      工作流系统<br/>(持久化执行)
+      事件驱动
+        消息代理<br/>(队列/主题)
+        Actor 框架
+    演化策略
+      滚动升级
+      模式兼容性检查
+      渐进式迁移
+```
+
 ## 核心概念
 
 ### 编码与解码
@@ -31,9 +63,8 @@ graph LR
 ### 兼容性要求
 
 ```mermaid
-graph TB
+graph LR
     subgraph backward["向后兼容 (Backward Compatibility)"]
-        direction LR
         NewCode["新代码 v2"]
         OldData["旧数据 v1"]
         NewCode -->|读取| OldData
@@ -41,7 +72,6 @@ graph TB
     end
 
     subgraph forward["向前兼容 (Forward Compatibility)"]
-        direction LR
         OldCode["旧代码 v1"]
         NewData["新数据 v2"]
         OldCode -->|读取| NewData
@@ -50,10 +80,10 @@ graph TB
 
     style NewCode fill:#90CAF9,stroke:#1565C0,stroke-width:2px
     style OldData fill:#FFE082,stroke:#FF8F00,stroke-width:2px
-    style OldCode fill:#FFE082,stroke:#FF8F00,stroke-width:2px
-    style NewData fill:#90CAF9,stroke:#1565C0,stroke-width:2px
-    style Note1 fill:#A5D6A7,stroke:#2E7D32,stroke-width:2px
-    style Note2 fill:#FFAB91,stroke:#D84315,stroke-width:2px
+    style OldCode fill:#FFAB91,stroke:#D84315,stroke-width:2px
+    style NewData fill:#A5D6A7,stroke:#2E7D32,stroke-width:2px
+    style Note1 fill:#CE93D8,stroke:#6A1B9A,stroke-width:2px
+    style Note2 fill:#CE93D8,stroke:#6A1B9A,stroke-width:2px
 ```
 
 系统演化过程中，新旧代码需要共存，因此需要满足：
@@ -343,39 +373,7 @@ message Person {
 | RPC | 必需 | 必需 | 滚动升级 |
 | 消息传递 | 必需 | 必需 | 异步处理 |
 
-## 本章总结
-
-```mermaid
-mindmap
-  root((第5章<br/>编码与演化))
-    编码格式
-      语言特定格式<br/>(不推荐)
-      文本格式<br/>(JSON/XML/CSV)
-      二进制模式驱动格式
-        Protocol Buffers<br/>(标签号)
-        Thrift<br/>(标签号)
-        Avro<br/>(字段名 + 模式解析)
-    模式演化
-      向后兼容<br/>(新读旧)
-      向前兼容<br/>(旧读新)
-      演化规则<br/>(添加/删除/修改字段)
-    数据流模式
-      数据库<br/>(数据长期存在)
-      服务<br/>(REST/RPC)
-        负载均衡
-        服务网格
-        API 版本控制
-      工作流系统<br/>(持久化执行)
-      事件驱动
-        消息代理<br/>(队列/主题)
-        Actor 框架
-    演化策略
-      滚动升级
-      模式兼容性检查
-      渐进式迁移
-```
-
-**核心理念**：
+## 核心理念
 
 > "通过一点小心，向后/向前兼容性和滚动升级是完全可以实现的。愿你的应用演化迅速，部署频繁。"
 

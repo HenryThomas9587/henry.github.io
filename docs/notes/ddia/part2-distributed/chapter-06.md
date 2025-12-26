@@ -6,7 +6,87 @@ permalink: /ddia/part2-distributed/chapter-06/
 
 # 第6章 复制
 
-## 章节概述
+## 章节概览
+
+```mermaid
+graph LR
+    Root[复制 Replication]
+
+    Root --> SingleLeader[单主复制<br/>Single-Leader]
+    Root --> MultiLeader[多主复制<br/>Multi-Leader]
+    Root --> Leaderless[无主复制<br/>Leaderless]
+    Root --> Lag[复制延迟问题]
+
+    SingleLeader --> SL_Arch[架构：一个主节点<br/>多个从节点]
+    SingleLeader --> SL_Repl[复制方式]
+    SingleLeader --> SL_Fault[故障处理]
+    SingleLeader --> SL_Log[日志实现]
+
+    SL_Repl --> SL_Sync[同步复制：强一致性<br/>可用性低]
+    SL_Repl --> SL_Async[异步复制：高可用性<br/>可能丢失数据]
+    SL_Repl --> SL_Semi[半同步复制：平衡方案]
+
+    SL_Fault --> SL_F_Follower[从节点故障：追赶式恢复]
+    SL_Fault --> SL_F_Leader[主节点故障：故障切换复杂]
+
+    SL_Log --> SL_L_Stmt[基于语句：简单但有局限]
+    SL_Log --> SL_L_WAL[WAL传输：精确但耦合]
+    SL_Log --> SL_L_Logical[逻辑日志：灵活但复杂]
+
+    MultiLeader --> ML_Scenario[使用场景]
+    MultiLeader --> ML_Topo[复制拓扑]
+    MultiLeader --> ML_Conflict[冲突处理]
+
+    ML_Scenario --> ML_S_DC[跨数据中心操作]
+    ML_Scenario --> ML_S_Offline[离线客户端]
+    ML_Scenario --> ML_S_Collab[实时协作]
+
+    ML_Topo --> ML_T_All[全连接：容错性强]
+    ML_Topo --> ML_T_Ring[环形：简单]
+    ML_Topo --> ML_T_Star[星形：集中控制]
+
+    ML_Conflict --> ML_C_Avoid[冲突避免]
+    ML_Conflict --> ML_C_LWW[最后写入胜利 LWW]
+    ML_Conflict --> ML_C_Manual[手动解决]
+    ML_Conflict --> ML_C_Auto[自动解决：CRDT/操作转换]
+
+    Leaderless --> LL_Arch[架构：无主节点<br/>任意副本可写]
+    Leaderless --> LL_Fault[故障处理]
+    Leaderless --> LL_Quorum[仲裁机制]
+    Leaderless --> LL_Concurrent[并发控制]
+
+    LL_Fault --> LL_F_Read[读修复]
+    LL_Fault --> LL_F_Hint[提示移交]
+    LL_Fault --> LL_F_Anti[反熵]
+
+    LL_Quorum --> LL_Q_Cond[条件：w + r > n]
+    LL_Quorum --> LL_Q_Config[常见配置：n=3, w=2, r=2]
+    LL_Quorum --> LL_Q_Limit[局限性：不保证强一致性]
+
+    LL_Concurrent --> LL_C_Happens[先发生关系]
+    LL_Concurrent --> LL_C_Version[版本向量]
+    LL_Concurrent --> LL_C_Detect[冲突检测与解决]
+
+    Lag --> Lag_Read[读己之写一致性]
+    Lag --> Lag_Mono[单调读]
+    Lag --> Lag_Prefix[一致前缀读]
+
+    Lag_Read --> Lag_R_Sol[解决：从主节点读取<br/>用户修改的数据]
+    Lag_Mono --> Lag_M_Sol[解决：用户固定读取<br/>同一副本]
+    Lag_Prefix --> Lag_P_Sol[解决：因果相关写入<br/>发送到同一分区]
+
+    classDef rootStyle fill:#CE93D8,stroke:#6A1B9A,stroke-width:3px
+    classDef categoryStyle fill:#90CAF9,stroke:#1565C0,stroke-width:2px
+    classDef subStyle fill:#A5D6A7,stroke:#2E7D32,stroke-width:2px
+    classDef detailStyle fill:#FFE082,stroke:#FF8F00,stroke-width:2px
+    classDef solutionStyle fill:#FFAB91,stroke:#D84315,stroke-width:2px
+
+    class Root rootStyle
+    class SingleLeader,MultiLeader,Leaderless,Lag categoryStyle
+    class SL_Arch,SL_Repl,SL_Fault,SL_Log,ML_Scenario,ML_Topo,ML_Conflict,LL_Arch,LL_Fault,LL_Quorum,LL_Concurrent,Lag_Read,Lag_Mono,Lag_Prefix subStyle
+    class SL_Sync,SL_Async,SL_Semi,SL_F_Follower,SL_F_Leader,SL_L_Stmt,SL_L_WAL,SL_L_Logical,ML_S_DC,ML_S_Offline,ML_S_Collab,ML_T_All,ML_T_Ring,ML_T_Star,ML_C_Avoid,ML_C_LWW,ML_C_Manual,ML_C_Auto,LL_F_Read,LL_F_Hint,LL_F_Anti,LL_Q_Cond,LL_Q_Config,LL_Q_Limit,LL_C_Happens,LL_C_Version,LL_C_Detect detailStyle
+    class Lag_R_Sol,Lag_M_Sol,Lag_P_Sol solutionStyle
+```
 
 复制（Replication）是指在通过网络连接的多台机器上保存相同数据的副本。复制的主要动机包括：
 
@@ -25,7 +105,7 @@ permalink: /ddia/part2-distributed/chapter-06/
 ### 1.1 基本架构
 
 ```mermaid
-graph TB
+graph LR
     Client1[客户端 - 写入请求]
     Client2[客户端 - 读取请求]
     Leader[主节点<br/>Leader]
@@ -139,12 +219,12 @@ graph TB
 ### 3.1 使用场景
 
 ```mermaid
-graph TB
+graph LR
     subgraph DC_A[数据中心 A - 北京]
+        UserA[用户 A<br/>本地低延迟写入]
         LeaderA[主节点 A<br/>Leader A]
         FollowerA1[从节点 A1]
         FollowerA2[从节点 A2]
-        UserA[用户 A<br/>本地低延迟写入]
 
         UserA -->|写入| LeaderA
         LeaderA --> FollowerA1
@@ -152,10 +232,10 @@ graph TB
     end
 
     subgraph DC_B[数据中心 B - 上海]
+        UserB[用户 B<br/>本地低延迟写入]
         LeaderB[主节点 B<br/>Leader B]
         FollowerB1[从节点 B1]
         FollowerB2[从节点 B2]
-        UserB[用户 B<br/>本地低延迟写入]
 
         UserB -->|写入| LeaderB
         LeaderB --> FollowerB1
@@ -311,88 +391,6 @@ graph TB
 | **一致前缀读** | 保持因果顺序 | 困难 | 中等 |
 | **线性一致性** | 全局顺序，实时保证 | 非常困难 | 较大 |
 | **最终一致性** | 最终收敛到相同状态 | 简单 | 最小 |
-
-## 七、本章总结
-
-```mermaid
-graph TB
-    Root[复制 Replication]
-
-    Root --> SingleLeader[单主复制<br/>Single-Leader]
-    Root --> MultiLeader[多主复制<br/>Multi-Leader]
-    Root --> Leaderless[无主复制<br/>Leaderless]
-    Root --> Lag[复制延迟问题]
-
-    SingleLeader --> SL_Arch[架构：一个主节点<br/>多个从节点]
-    SingleLeader --> SL_Repl[复制方式]
-    SingleLeader --> SL_Fault[故障处理]
-    SingleLeader --> SL_Log[日志实现]
-
-    SL_Repl --> SL_Sync[同步复制：强一致性<br/>可用性低]
-    SL_Repl --> SL_Async[异步复制：高可用性<br/>可能丢失数据]
-    SL_Repl --> SL_Semi[半同步复制：平衡方案]
-
-    SL_Fault --> SL_F_Follower[从节点故障：追赶式恢复]
-    SL_Fault --> SL_F_Leader[主节点故障：故障切换复杂]
-
-    SL_Log --> SL_L_Stmt[基于语句：简单但有局限]
-    SL_Log --> SL_L_WAL[WAL传输：精确但耦合]
-    SL_Log --> SL_L_Logical[逻辑日志：灵活但复杂]
-
-    MultiLeader --> ML_Scenario[使用场景]
-    MultiLeader --> ML_Topo[复制拓扑]
-    MultiLeader --> ML_Conflict[冲突处理]
-
-    ML_Scenario --> ML_S_DC[跨数据中心操作]
-    ML_Scenario --> ML_S_Offline[离线客户端]
-    ML_Scenario --> ML_S_Collab[实时协作]
-
-    ML_Topo --> ML_T_All[全连接：容错性强]
-    ML_Topo --> ML_T_Ring[环形：简单]
-    ML_Topo --> ML_T_Star[星形：集中控制]
-
-    ML_Conflict --> ML_C_Avoid[冲突避免]
-    ML_Conflict --> ML_C_LWW[最后写入胜利 LWW]
-    ML_Conflict --> ML_C_Manual[手动解决]
-    ML_Conflict --> ML_C_Auto[自动解决：CRDT/操作转换]
-
-    Leaderless --> LL_Arch[架构：无主节点<br/>任意副本可写]
-    Leaderless --> LL_Fault[故障处理]
-    Leaderless --> LL_Quorum[仲裁机制]
-    Leaderless --> LL_Concurrent[并发控制]
-
-    LL_Fault --> LL_F_Read[读修复]
-    LL_Fault --> LL_F_Hint[提示移交]
-    LL_Fault --> LL_F_Anti[反熵]
-
-    LL_Quorum --> LL_Q_Cond[条件：w + r > n]
-    LL_Quorum --> LL_Q_Config[常见配置：n=3, w=2, r=2]
-    LL_Quorum --> LL_Q_Limit[局限性：不保证强一致性]
-
-    LL_Concurrent --> LL_C_Happens[先发生关系]
-    LL_Concurrent --> LL_C_Version[版本向量]
-    LL_Concurrent --> LL_C_Detect[冲突检测与解决]
-
-    Lag --> Lag_Read[读己之写一致性]
-    Lag --> Lag_Mono[单调读]
-    Lag --> Lag_Prefix[一致前缀读]
-
-    Lag_Read --> Lag_R_Sol[解决：从主节点读取<br/>用户修改的数据]
-    Lag_Mono --> Lag_M_Sol[解决：用户固定读取<br/>同一副本]
-    Lag_Prefix --> Lag_P_Sol[解决：因果相关写入<br/>发送到同一分区]
-
-    classDef rootStyle fill:#CE93D8,stroke:#6A1B9A,stroke-width:3px
-    classDef categoryStyle fill:#90CAF9,stroke:#1565C0,stroke-width:2px
-    classDef subStyle fill:#A5D6A7,stroke:#2E7D32,stroke-width:2px
-    classDef detailStyle fill:#FFE082,stroke:#FF8F00,stroke-width:2px
-    classDef solutionStyle fill:#FFAB91,stroke:#D84315,stroke-width:2px
-
-    class Root rootStyle
-    class SingleLeader,MultiLeader,Leaderless,Lag categoryStyle
-    class SL_Arch,SL_Repl,SL_Fault,SL_Log,ML_Scenario,ML_Topo,ML_Conflict,LL_Arch,LL_Fault,LL_Quorum,LL_Concurrent,Lag_Read,Lag_Mono,Lag_Prefix subStyle
-    class SL_Sync,SL_Async,SL_Semi,SL_F_Follower,SL_F_Leader,SL_L_Stmt,SL_L_WAL,SL_L_Logical,ML_S_DC,ML_S_Offline,ML_S_Collab,ML_T_All,ML_T_Ring,ML_T_Star,ML_C_Avoid,ML_C_LWW,ML_C_Manual,ML_C_Auto,LL_F_Read,LL_F_Hint,LL_F_Anti,LL_Q_Cond,LL_Q_Config,LL_Q_Limit,LL_C_Happens,LL_C_Version,LL_C_Detect detailStyle
-    class Lag_R_Sol,Lag_M_Sol,Lag_P_Sol solutionStyle
-```
 
 ## 核心要点
 

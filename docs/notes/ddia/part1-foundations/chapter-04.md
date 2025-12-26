@@ -5,7 +5,56 @@ createTime: 2025-12-26
 
 # 第4章 存储与检索
 
-## 章节概述
+## 章节概览
+
+```mermaid
+mindmap
+  root((第4章<br/>存储与检索))
+    核心权衡
+      读性能 vs 写性能
+      存储空间 vs 查询速度
+      简单性 vs 功能性
+    OLTP 存储引擎
+      日志结构
+        SSTable
+        LSM-Tree
+        压缩策略
+          Size-tiered
+          Leveled
+        布隆过滤器
+      页面导向
+        B-Tree
+        预写日志 WAL
+        Copy-on-write
+      索引类型
+        主键索引 vs 二级索引
+        聚簇索引 vs 非聚簇索引
+        多维索引
+          R-Tree
+          倒排索引
+          向量索引
+    OLAP 存储引擎
+      列式存储
+        按列组织数据
+        压缩技术
+          位图
+          游程
+          字典
+        向量化处理
+      数据仓库架构
+        星型模式 / 雪花模式
+        计算存储分离
+        模块化组件生态
+      查询优化
+        物化视图
+        数据立方体
+        查询编译
+    关键洞察
+      没有万能的存储引擎
+      工作负载特征决定选择
+      理解内部机制才能有效调优
+      云原生架构趋向模块化和弹性
+```
 
 本章深入探讨数据库如何存储和检索数据，重点分析面向事务处理（OLTP）和分析处理（OLAP）两类工作负载的存储引擎架构及其基本权衡。理解存储引擎内部机制有助于选择合适的数据库并有效调优性能参数。
 
@@ -32,7 +81,7 @@ createTime: 2025-12-26
 SSTable 是按键排序的键值对文件格式，相比简单日志文件的优势：
 
 ```mermaid
-flowchart TD
+flowchart LR
     subgraph Memory["内存 (Memtable)"]
         MT["红黑树/跳表 (按键排序)<br/>key1 → value1<br/>key2 → value2<br/>key3 → value3"]
     end
@@ -89,7 +138,7 @@ LSM-Tree 是基于 SSTable 的完整存储引擎实现。
 B-Tree 采用固定大小页面的就地更新策略，是最广泛使用的索引结构。
 
 ```mermaid
-graph TD
+flowchart LR
     Root["根节点 (Root)<br/>[10] [20] [30]"]
 
     B1["[3] [7]"]
@@ -143,9 +192,9 @@ graph TD
 ### LSM-Tree vs B-Tree 对比
 
 ```mermaid
-flowchart TD
+flowchart LR
     subgraph LSM["LSM-Tree"]
-        direction TB
+        direction LR
         LM["Memtable<br/>写入"]
         LL0["SSTable L0"]
         LL1["SSTable L1"]
@@ -157,7 +206,7 @@ flowchart TD
     end
 
     subgraph BT["B-Tree"]
-        direction TB
+        direction LR
         BR["Root"]
         BB1["Branch"]
         BB2["Branch"]
@@ -327,7 +376,7 @@ flowchart TD
 ### 选择决策树
 
 ```mermaid
-flowchart TD
+flowchart LR
     Start["存储引擎选择"]
 
     Start --> OLTP["OLTP 工作负载"]
@@ -412,57 +461,6 @@ flowchart TD
 - 定期重建索引
 - 调整压缩触发阈值
 - 及时清理旧版本
-
-## 本章总结
-
-```mermaid
-mindmap
-  root((第4章<br/>存储与检索))
-    核心权衡
-      读性能 vs 写性能
-      存储空间 vs 查询速度
-      简单性 vs 功能性
-    OLTP 存储引擎
-      日志结构
-        SSTable
-        LSM-Tree
-        压缩策略
-          Size-tiered
-          Leveled
-        布隆过滤器
-      页面导向
-        B-Tree
-        预写日志 WAL
-        Copy-on-write
-      索引类型
-        主键索引 vs 二级索引
-        聚簇索引 vs 非聚簇索引
-        多维索引
-          R-Tree
-          倒排索引
-          向量索引
-    OLAP 存储引擎
-      列式存储
-        按列组织数据
-        压缩技术
-          位图
-          游程
-          字典
-        向量化处理
-      数据仓库架构
-        星型模式 / 雪花模式
-        计算存储分离
-        模块化组件生态
-      查询优化
-        物化视图
-        数据立方体
-        查询编译
-    关键洞察
-      没有万能的存储引擎
-      工作负载特征决定选择
-      理解内部机制才能有效调优
-      云原生架构趋向模块化和弹性
-```
 
 ## 延伸思考
 

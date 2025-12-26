@@ -6,6 +6,72 @@ title: 第3章 数据模型与查询语言
 
 > 本章基于 [DDIA 中文翻译](https://ddia.vonng.com/ch3/) 整理
 
+## 章节概览
+
+```mermaid
+graph LR
+    A["数据模型与查询语言"]
+
+    B["关系模型"]
+    B1["优势：数据一致性、强大查询能力"]
+    B2["劣势：对象-关系阻抗失配"]
+    B3["适用：结构稳定、多表关联"]
+
+    C["文档模型"]
+    C1["优势：模式灵活、局部性好"]
+    C2["劣势：JOIN 支持弱、数据冗余"]
+    C3["适用：树形结构、自包含文档"]
+
+    D["图模型"]
+    D1["优势：多对多关系自然、路径查询强大"]
+    D2["劣势：学习曲线陡峭"]
+    D3["适用：高度互联数据、社交网络"]
+
+    E["查询语言"]
+    E1["SQL：声明式、成熟、标准化"]
+    E2["Cypher：图查询直观、模式匹配"]
+    E3["SPARQL：语义网、三元组"]
+    E4["Datalog：规则式、逻辑编程"]
+
+    F["高级模式"]
+    F1["事件溯源：不可变事件日志"]
+    F2["CQRS：读写分离、多视图"]
+    F3["数据框：科学计算、机器学习"]
+
+    A --> B
+    B --> B1
+    B --> B2
+    B --> B3
+
+    A --> C
+    C --> C1
+    C --> C2
+    C --> C3
+
+    A --> D
+    D --> D1
+    D --> D2
+    D --> D3
+
+    A --> E
+    E --> E1
+    E --> E2
+    E --> E3
+    E --> E4
+
+    A --> F
+    F --> F1
+    F --> F2
+    F --> F3
+
+    style A fill:#CE93D8,stroke:#6A1B9A,stroke-width:2px
+    style B fill:#90CAF9,stroke:#1565C0,stroke-width:2px
+    style C fill:#FFE082,stroke:#FF8F00,stroke-width:2px
+    style D fill:#A5D6A7,stroke:#2E7D32,stroke-width:2px
+    style E fill:#FFAB91,stroke:#D84315,stroke-width:2px
+    style F fill:#CE93D8,stroke:#6A1B9A,stroke-width:2px
+```
+
 ## 概述
 
 数据模型是软件开发中最重要的部分，因为它们不仅影响软件的编写方式，还影响我们思考问题的方式。
@@ -13,7 +79,7 @@ title: 第3章 数据模型与查询语言
 ### 数据模型的抽象层次
 
 ```mermaid
-graph TD
+graph LR
     A["应用层<br/>对象、数据结构、API"]
     B["通用数据模型层<br/>JSON / XML / 关系表 / 图 / 时序数据"]
     C["存储引擎层<br/>B-Tree / LSM-Tree / 列式存储"]
@@ -43,10 +109,17 @@ graph TD
 
 面向对象编程与关系表之间存在不匹配：
 
-```
-应用代码（对象）
-    ↕ 阻抗失配
-数据库（关系表）
+```mermaid
+graph LR
+    A["应用代码（对象）"]
+    B["阻抗失配"]
+    C["数据库（关系表）"]
+
+    A --> B --> C
+
+    style A fill:#90CAF9,stroke:#1565C0,stroke-width:2px
+    style B fill:#FFAB91,stroke:#D84315,stroke-width:2px
+    style C fill:#A5D6A7,stroke:#2E7D32,stroke-width:2px
 ```
 
 **ORM 框架的局限**：
@@ -128,7 +201,7 @@ graph LR
 ### 图的基本组成
 
 ```mermaid
-graph TD
+graph LR
     A["图数据模型"]
     B["顶点 Vertex<br/>• 唯一标识符<br/>• 标签(类型)<br/>• 属性(键值对)<br/>• 入边/出边"]
     C["边 Edge<br/>• 唯一标识符<br/>• 起点/终点<br/>• 标签(关系类型)<br/>• 属性(键值对)"]
@@ -145,7 +218,7 @@ graph TD
 **示例：社交网络图**
 
 ```mermaid
-graph TD
+graph LR
     Alice["Alice"]
     Bob["Bob"]
     Beijing["Beijing"]
@@ -246,7 +319,7 @@ born_in_usa(Person, Name) :- born_in(Person, Location),
 ### 事件溯源（Event Sourcing）
 
 ```mermaid
-graph TD
+graph LR
     A["传统方式：存储当前状态"]
     B["事件溯源：存储所有状态变更事件"]
 
@@ -282,7 +355,7 @@ graph TD
 ### CQRS（命令查询职责分离）
 
 ```mermaid
-graph TD
+graph LR
     A["写入优化表示<br/>事件日志"]
     B["派生多个读取优化视图"]
     C["视图 A：用户列表"]
@@ -362,7 +435,7 @@ user_id | category_A | category_B
 ### 决策树
 
 ```mermaid
-graph TD
+graph LR
     A["数据结构特征"]
     B["树形结构、自包含文档"]
     C["多对多关系较少、结构稳定"]
@@ -406,7 +479,7 @@ graph TD
 现代数据库越来越支持多模型：
 
 ```mermaid
-graph TD
+graph LR
     A["PostgreSQL"]
     B["关系表<br/>传统 SQL"]
     C["JSONB<br/>文档模型"]
@@ -427,73 +500,8 @@ graph TD
 
 > 一个模型可以模拟另一个模型，但结果往往很笨拙。选择合适的数据模型对系统成功至关重要。
 
-## 本章总结
+## 核心原则
 
-```mermaid
-graph TD
-    A["数据模型与查询语言"]
-
-    B["关系模型"]
-    B1["优势：数据一致性、强大查询能力"]
-    B2["劣势：对象-关系阻抗失配"]
-    B3["适用：结构稳定、多表关联"]
-
-    C["文档模型"]
-    C1["优势：模式灵活、局部性好"]
-    C2["劣势：JOIN 支持弱、数据冗余"]
-    C3["适用：树形结构、自包含文档"]
-
-    D["图模型"]
-    D1["优势：多对多关系自然、路径查询强大"]
-    D2["劣势：学习曲线陡峭"]
-    D3["适用：高度互联数据、社交网络"]
-
-    E["查询语言"]
-    E1["SQL：声明式、成熟、标准化"]
-    E2["Cypher：图查询直观、模式匹配"]
-    E3["SPARQL：语义网、三元组"]
-    E4["Datalog：规则式、逻辑编程"]
-
-    F["高级模式"]
-    F1["事件溯源：不可变事件日志"]
-    F2["CQRS：读写分离、多视图"]
-    F3["数据框：科学计算、机器学习"]
-
-    A --> B
-    B --> B1
-    B --> B2
-    B --> B3
-
-    A --> C
-    C --> C1
-    C --> C2
-    C --> C3
-
-    A --> D
-    D --> D1
-    D --> D2
-    D --> D3
-
-    A --> E
-    E --> E1
-    E --> E2
-    E --> E3
-    E --> E4
-
-    A --> F
-    F --> F1
-    F --> F2
-    F --> F3
-
-    style A fill:#CE93D8,stroke:#6A1B9A,stroke-width:2px
-    style B fill:#90CAF9,stroke:#1565C0,stroke-width:2px
-    style C fill:#FFE082,stroke:#FF8F00,stroke-width:2px
-    style D fill:#A5D6A7,stroke:#2E7D32,stroke-width:2px
-    style E fill:#FFAB91,stroke:#D84315,stroke-width:2px
-    style F fill:#CE93D8,stroke:#6A1B9A,stroke-width:2px
-```
-
-**核心原则**：
 - 根据数据结构和查询模式选择模型
 - 规范化与反规范化需权衡读写性能
 - Schema-on-read 提供灵活性，Schema-on-write 提供保证

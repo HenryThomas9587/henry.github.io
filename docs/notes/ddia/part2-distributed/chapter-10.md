@@ -5,7 +5,121 @@ createTime: 2025-12-26
 
 # 第10章：一致性与共识
 
-## 章节概述
+## 章节概览
+
+```mermaid
+graph LR
+    Root([一致性与共识])
+
+    %% 一致性模型
+    CM[一致性模型]
+    L[线性一致性 - 最强]
+    L1[新鲜性保证]
+    L2[全局顺序]
+    L3[应用：锁、选举、唯一性约束]
+    C[因果一致性 - 较弱但高效]
+    C1[Lamport 时间戳]
+    C2[混合逻辑时钟]
+    C3[向量时钟]
+
+    %% 共识算法
+    CA[共识算法]
+    CP[核心属性]
+    CP1[Agreement - 一致性]
+    CP2[Integrity - 完整性]
+    CP3[Validity - 有效性]
+    CP4[Termination - 终止性]
+
+    MA[主流算法]
+    MA1[Raft - 易理解，强领导者]
+    MA2[Paxos - 经典理论基础]
+    MA3[Zab - ZooKeeper 专用]
+
+    PM[通用模式]
+    PM1[领导者选举 - epoch/term]
+    PM2[提案阶段 - quorum 投票]
+    PM3[提交阶段 - 多数接受]
+    PM4[日志复制 - 有序执行]
+
+    %% 等价问题
+    EP[等价问题]
+    EP1[全序广播]
+    EP2[线性一致的 CAS]
+    EP3[原子提交 - 2PC/3PC]
+    EP4[领导者选举]
+
+    %% 状态机复制
+    SMR[状态机复制]
+    SMR1[相同顺序执行相同操作]
+    SMR2[确定性状态机]
+    SMR3[应用：数据库、配置、队列]
+
+    %% 权衡与限制
+    TL[权衡与限制]
+    TL1[性能代价 - 协调开销]
+    TL2[容错能力 - 需要多数节点]
+    TL3[CAP 权衡 - 分区时选择 C 或 A]
+    TL4[地理分布挑战]
+
+    %% 连接关系
+    Root --> CM
+    Root --> CA
+    Root --> EP
+    Root --> SMR
+    Root --> TL
+
+    CM --> L
+    CM --> C
+    L --> L1
+    L --> L2
+    L --> L3
+    C --> C1
+    C --> C2
+    C --> C3
+
+    CA --> CP
+    CA --> MA
+    CA --> PM
+    CP --> CP1
+    CP --> CP2
+    CP --> CP3
+    CP --> CP4
+    MA --> MA1
+    MA --> MA2
+    MA --> MA3
+    PM --> PM1
+    PM --> PM2
+    PM --> PM3
+    PM --> PM4
+
+    EP --> EP1
+    EP --> EP2
+    EP --> EP3
+    EP --> EP4
+
+    SMR --> SMR1
+    SMR --> SMR2
+    SMR --> SMR3
+
+    TL --> TL1
+    TL --> TL2
+    TL --> TL3
+    TL --> TL4
+
+    %% 样式定义
+    classDef blueStyle fill:#90CAF9,stroke:#1565C0,stroke-width:2px
+    classDef orangeStyle fill:#FFE082,stroke:#FF8F00,stroke-width:2px
+    classDef greenStyle fill:#A5D6A7,stroke:#2E7D32,stroke-width:2px
+    classDef redStyle fill:#FFAB91,stroke:#D84315,stroke-width:2px
+    classDef purpleStyle fill:#CE93D8,stroke:#6A1B9A,stroke-width:2px
+
+    class Root blueStyle
+    class CM,L,C,L1,L2,L3,C1,C2,C3 orangeStyle
+    class CA,CP,MA,PM,CP1,CP2,CP3,CP4,MA1,MA2,MA3,PM1,PM2,PM3,PM4 greenStyle
+    class EP,EP1,EP2,EP3,EP4 purpleStyle
+    class SMR,SMR1,SMR2,SMR3 redStyle
+    class TL,TL1,TL2,TL3,TL4 blueStyle
+```
 
 本章探讨分布式系统中的强一致性保证和共识算法，这是构建容错分布式系统的理论基础。主要内容包括：
 
@@ -148,7 +262,7 @@ createTime: 2025-12-26
 ### 共识算法通用模式
 
 ```mermaid
-graph TB
+graph LR
     Start([共识算法流程])
 
     subgraph Phase1[" 1. 领导者选举 "]
@@ -304,121 +418,7 @@ graph TB
 - CockroachDB：使用 Raft 实现分布式 SQL
 - MongoDB：使用 Raft-like 协议进行副本集选举
 
-## 本章总结
-
-```mermaid
-graph TB
-    Root([一致性与共识])
-
-    %% 一致性模型
-    CM[一致性模型]
-    L[线性一致性 - 最强]
-    L1[新鲜性保证]
-    L2[全局顺序]
-    L3[应用：锁、选举、唯一性约束]
-    C[因果一致性 - 较弱但高效]
-    C1[Lamport 时间戳]
-    C2[混合逻辑时钟]
-    C3[向量时钟]
-
-    %% 共识算法
-    CA[共识算法]
-    CP[核心属性]
-    CP1[Agreement - 一致性]
-    CP2[Integrity - 完整性]
-    CP3[Validity - 有效性]
-    CP4[Termination - 终止性]
-
-    MA[主流算法]
-    MA1[Raft - 易理解，强领导者]
-    MA2[Paxos - 经典理论基础]
-    MA3[Zab - ZooKeeper 专用]
-
-    PM[通用模式]
-    PM1[领导者选举 - epoch/term]
-    PM2[提案阶段 - quorum 投票]
-    PM3[提交阶段 - 多数接受]
-    PM4[日志复制 - 有序执行]
-
-    %% 等价问题
-    EP[等价问题]
-    EP1[全序广播]
-    EP2[线性一致的 CAS]
-    EP3[原子提交 - 2PC/3PC]
-    EP4[领导者选举]
-
-    %% 状态机复制
-    SMR[状态机复制]
-    SMR1[相同顺序执行相同操作]
-    SMR2[确定性状态机]
-    SMR3[应用：数据库、配置、队列]
-
-    %% 权衡与限制
-    TL[权衡与限制]
-    TL1[性能代价 - 协调开销]
-    TL2[容错能力 - 需要多数节点]
-    TL3[CAP 权衡 - 分区时选择 C 或 A]
-    TL4[地理分布挑战]
-
-    %% 连接关系
-    Root --> CM
-    Root --> CA
-    Root --> EP
-    Root --> SMR
-    Root --> TL
-
-    CM --> L
-    CM --> C
-    L --> L1
-    L --> L2
-    L --> L3
-    C --> C1
-    C --> C2
-    C --> C3
-
-    CA --> CP
-    CA --> MA
-    CA --> PM
-    CP --> CP1
-    CP --> CP2
-    CP --> CP3
-    CP --> CP4
-    MA --> MA1
-    MA --> MA2
-    MA --> MA3
-    PM --> PM1
-    PM --> PM2
-    PM --> PM3
-    PM --> PM4
-
-    EP --> EP1
-    EP --> EP2
-    EP --> EP3
-    EP --> EP4
-
-    SMR --> SMR1
-    SMR --> SMR2
-    SMR --> SMR3
-
-    TL --> TL1
-    TL --> TL2
-    TL --> TL3
-    TL --> TL4
-
-    %% 样式定义
-    classDef blueStyle fill:#90CAF9,stroke:#1565C0,stroke-width:2px
-    classDef orangeStyle fill:#FFE082,stroke:#FF8F00,stroke-width:2px
-    classDef greenStyle fill:#A5D6A7,stroke:#2E7D32,stroke-width:2px
-    classDef redStyle fill:#FFAB91,stroke:#D84315,stroke-width:2px
-    classDef purpleStyle fill:#CE93D8,stroke:#6A1B9A,stroke-width:2px
-
-    class Root blueStyle
-    class CM,L,C,L1,L2,L3,C1,C2,C3 orangeStyle
-    class CA,CP,MA,PM,CP1,CP2,CP3,CP4,MA1,MA2,MA3,PM1,PM2,PM3,PM4 greenStyle
-    class EP,EP1,EP2,EP3,EP4 purpleStyle
-    class SMR,SMR1,SMR2,SMR3 redStyle
-    class TL,TL1,TL2,TL3,TL4 blueStyle
-```
+## 核心理念
 
 **核心要点**：
 

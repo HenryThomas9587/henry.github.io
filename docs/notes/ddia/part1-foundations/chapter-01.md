@@ -6,6 +6,41 @@ title: 第1章 可靠性、可扩展性与可维护性
 
 > 本章基于 [DDIA 中文翻译](https://ddia.vonng.com/ch1/) 整理
 
+## 章节概览
+
+```mermaid
+graph LR
+    ROOT[第1章 总览] --> A[三大目标]
+    ROOT --> B[核心概念]
+    ROOT --> C[架构权衡]
+    ROOT --> D[法律与社会因素]
+
+    A --> A1[可靠性]
+    A --> A2[可扩展性]
+    A --> A3[可维护性]
+
+    B --> B1[数据密集型 vs 计算密集型]
+    B --> B2[数据系统的组合]
+
+    C --> C1[OLTP vs OLAP]
+    C --> C2[单节点 vs 分布式]
+    C --> C3[云服务 vs 自托管]
+
+    style ROOT fill:#90CAF9,stroke:#1565C0,stroke-width:2px
+    style A fill:#FFAB91,stroke:#D84315,stroke-width:2px
+    style B fill:#A5D6A7,stroke:#2E7D32,stroke-width:2px
+    style C fill:#FFE082,stroke:#FF8F00,stroke-width:2px
+    style D fill:#CE93D8,stroke:#6A1B9A,stroke-width:2px
+    style A1 fill:#FFCDD2,stroke:#E57373,stroke-width:2px
+    style A2 fill:#FFCDD2,stroke:#E57373,stroke-width:2px
+    style A3 fill:#FFCDD2,stroke:#E57373,stroke-width:2px
+    style B1 fill:#C8E6C9,stroke:#81C784,stroke-width:2px
+    style B2 fill:#C8E6C9,stroke:#81C784,stroke-width:2px
+    style C1 fill:#FFECB3,stroke:#FFC107,stroke-width:2px
+    style C2 fill:#FFECB3,stroke:#FFC107,stroke-width:2px
+    style C3 fill:#FFECB3,stroke:#FFC107,stroke-width:2px
+```
+
 ## 核心概念
 
 ### 什么是数据密集型应用
@@ -45,9 +80,9 @@ graph TB
 
     style APP fill:#90CAF9,stroke:#1565C0,stroke-width:2px
     style DB fill:#FFE082,stroke:#FF8F00,stroke-width:2px
-    style CACHE fill:#FFE082,stroke:#FF8F00,stroke-width:2px
-    style SEARCH fill:#FFE082,stroke:#FF8F00,stroke-width:2px
-    style MQ fill:#FFE082,stroke:#FF8F00,stroke-width:2px
+    style CACHE fill:#FFAB91,stroke:#D84315,stroke-width:2px
+    style SEARCH fill:#A5D6A7,stroke:#2E7D32,stroke-width:2px
+    style MQ fill:#B39DDB,stroke:#512DA8,stroke-width:2px
     style BATCH fill:#CE93D8,stroke:#6A1B9A,stroke-width:2px
 ```
 
@@ -62,10 +97,8 @@ graph TB
 ## 三大设计目标
 
 ```mermaid
-graph TB
-    ROOT[数据密集型应用设计]
-
-    ROOT --> R[可靠性<br/>Reliability]
+graph LR
+    ROOT[数据密集型应用设计] --> R[可靠性<br/>Reliability]
     ROOT --> S[可扩展性<br/>Scalability]
     ROOT --> M[可维护性<br/>Maintainability]
 
@@ -163,25 +196,8 @@ graph TB
 - 用户权利与审计要求
 - 社会影响与伦理问题
 
-## 本章总结
+## 核心理念
 
-```
-第1章 总览
- ├── 三大目标
- │    ├── 可靠性（Reliability）
- │    ├── 可扩展性（Scalability）
- │    └── 可维护性（Maintainability）
- ├── 核心概念
- │    ├── 数据密集型 vs 计算密集型
- │    └── 数据系统的组合
- ├── 架构权衡
- │    ├── OLTP vs OLAP
- │    ├── 单节点 vs 分布式
- │    └── 云服务 vs 自托管
- └── 法律与社会因素
-```
-
-**核心理念**：
 - 系统设计的核心是理解各种选择的利弊，在需求和资源之间找到最合适的平衡点
 - 没有完美方案，只有权衡
 - 简单，是一种长期竞争力

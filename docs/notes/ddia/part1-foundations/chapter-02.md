@@ -6,6 +6,56 @@ title: 第2章 定义非功能性需求
 
 > 本章基于 [DDIA 中文翻译](https://ddia.vonng.com/ch2/) 整理
 
+## 章节概览
+
+```mermaid
+graph LR
+    NFR[非功能性需求] --> PERF[性能]
+    NFR --> REL[可靠性]
+    NFR --> SCALE[可伸缩性]
+    NFR --> MAINT[可维护性]
+
+    PERF --> RT[响应时间 vs 吞吐量]
+    PERF --> PCT[百分位数 p50/p95/p99]
+    PERF --> TAIL[尾部延迟放大]
+
+    REL --> FVF[故障 vs 失效]
+    REL --> FTYPE[硬件/软件/人为故障]
+    REL --> TOL[容错策略]
+
+    SCALE --> ARCH[共享内存/共享磁盘/无共享]
+    SCALE --> VS[垂直 vs 水平扩展]
+    SCALE --> PLAN[渐进式规划]
+
+    MAINT --> OPS[可运维性]
+    MAINT --> SIMP[简单性]
+    MAINT --> EVOL[可演化性]
+
+    style NFR fill:#CE93D8,stroke:#6A1B9A,stroke-width:2px
+    style PERF fill:#90CAF9,stroke:#1565C0,stroke-width:2px
+    style REL fill:#FFE082,stroke:#FF8F00,stroke-width:2px
+    style SCALE fill:#A5D6A7,stroke:#2E7D32,stroke-width:2px
+    style MAINT fill:#FFAB91,stroke:#D84315,stroke-width:2px
+    style RT fill:#90CAF9,stroke:#1565C0,stroke-width:1px
+    style PCT fill:#90CAF9,stroke:#1565C0,stroke-width:1px
+    style TAIL fill:#90CAF9,stroke:#1565C0,stroke-width:1px
+    style FVF fill:#FFE082,stroke:#FF8F00,stroke-width:1px
+    style FTYPE fill:#FFE082,stroke:#FF8F00,stroke-width:1px
+    style TOL fill:#FFE082,stroke:#FF8F00,stroke-width:1px
+    style ARCH fill:#A5D6A7,stroke:#2E7D32,stroke-width:1px
+    style VS fill:#A5D6A7,stroke:#2E7D32,stroke-width:1px
+    style PLAN fill:#A5D6A7,stroke:#2E7D32,stroke-width:1px
+    style OPS fill:#FFAB91,stroke:#D84315,stroke-width:1px
+    style SIMP fill:#FFAB91,stroke:#D84315,stroke-width:1px
+    style EVOL fill:#FFAB91,stroke:#D84315,stroke-width:1px
+```
+
+**核心理念**：
+- 用百分位数而非平均值衡量性能
+- 构建能容忍故障的系统，而非追求零故障
+- 不要过度设计，单机能解决就不要分布式
+- 简单性是长期可维护的基础
+
 ## 概述
 
 本章通过一个社交网络案例，深入探讨数据系统的四大非功能性需求：**性能**、**可靠性**、**可伸缩性**、**可维护性**。
@@ -118,26 +168,28 @@ graph LR
 
 在微服务架构中，一个用户请求可能调用多个后端服务：
 
-```
-                              用户请求
-                                  │
-                                  ▼
-                          ┌───────────────┐
-                          │   API 网关    │
-                          └───────────────┘
-                                  │
-          ┌───────────┬───────────┼───────────┬───────────┐
-          ▼           ▼           ▼           ▼           ▼
-     ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐
-     │ 服务 A  │ │ 服务 B  │ │ 服务 C  │ │ 服务 D  │ │ 服务 E  │
-     │  10ms   │ │  15ms   │ │  200ms  │ │  12ms   │ │  8ms    │
-     └─────────┘ └─────────┘ └─────────┘ └─────────┘ └─────────┘
-          │           │           │           │           │
-          └───────────┴───────────┴───────────┴───────────┘
-                                  │
-                                  ▼
-                    整体响应时间 = max(10,15,200,12,8) = 200ms
-                              (被服务C拖慢)
+```mermaid
+graph LR
+    USER[用户请求] --> GATEWAY[API 网关]
+    GATEWAY --> SA[服务 A<br/>10ms]
+    GATEWAY --> SB[服务 B<br/>15ms]
+    GATEWAY --> SC[服务 C<br/>200ms]
+    GATEWAY --> SD[服务 D<br/>12ms]
+    GATEWAY --> SE[服务 E<br/>8ms]
+    SA --> RESULT[整体响应时间<br/>max 10,15,200,12,8<br/>= 200ms<br/>被服务C拖慢]
+    SB --> RESULT
+    SC --> RESULT
+    SD --> RESULT
+    SE --> RESULT
+
+    style USER fill:#90CAF9,stroke:#1565C0,stroke-width:2px
+    style GATEWAY fill:#CE93D8,stroke:#6A1B9A,stroke-width:2px
+    style SA fill:#A5D6A7,stroke:#2E7D32,stroke-width:2px
+    style SB fill:#A5D6A7,stroke:#2E7D32,stroke-width:2px
+    style SC fill:#FFAB91,stroke:#D84315,stroke-width:2px
+    style SD fill:#A5D6A7,stroke:#2E7D32,stroke-width:2px
+    style SE fill:#A5D6A7,stroke:#2E7D32,stroke-width:2px
+    style RESULT fill:#FFE082,stroke:#FF8F00,stroke-width:2px
 ```
 
 > 只需一个慢调用就能拖慢整个请求。后端服务越多，出现慢调用的概率越高。
@@ -188,67 +240,88 @@ SLO 定义：
 
 ### 容错策略
 
-```
-硬件层面：
-├── RAID 配置
-├── 双电源供应
-├── 热插拔 CPU
-└── 多数据中心部署
+```mermaid
+graph LR
+    TOL[容错策略] --> HW[硬件层面]
+    TOL --> SW[软件层面]
+    TOL --> ORG[组织层面]
 
-软件层面：
-├── 滚动升级（一次修补一个节点）
-├── 快速回滚机制
-├── 逐步推出（灰度发布）
-└── 详细监控和告警
+    HW --> RAID[RAID 配置]
+    HW --> POWER[双电源供应]
+    HW --> CPU[热插拔 CPU]
+    HW --> DC[多数据中心部署]
 
-组织层面：
-├── 混沌工程（主动注入故障）
-├── 无责备事后分析
-└── 系统性改进而非追责个人
+    SW --> ROLL[滚动升级<br/>一次修补一个节点]
+    SW --> BACK[快速回滚机制]
+    SW --> GRAY[逐步推出<br/>灰度发布]
+    SW --> MON[详细监控和告警]
+
+    ORG --> CHAOS[混沌工程<br/>主动注入故障]
+    ORG --> BLAME[无责备事后分析]
+    ORG --> IMP[系统性改进<br/>而非追责个人]
+
+    style TOL fill:#CE93D8,stroke:#6A1B9A,stroke-width:2px
+    style HW fill:#90CAF9,stroke:#1565C0,stroke-width:2px
+    style SW fill:#FFE082,stroke:#FF8F00,stroke-width:2px
+    style ORG fill:#A5D6A7,stroke:#2E7D32,stroke-width:2px
+    style RAID fill:#90CAF9,stroke:#1565C0,stroke-width:1px
+    style POWER fill:#90CAF9,stroke:#1565C0,stroke-width:1px
+    style CPU fill:#90CAF9,stroke:#1565C0,stroke-width:1px
+    style DC fill:#90CAF9,stroke:#1565C0,stroke-width:1px
+    style ROLL fill:#FFE082,stroke:#FF8F00,stroke-width:1px
+    style BACK fill:#FFE082,stroke:#FF8F00,stroke-width:1px
+    style GRAY fill:#FFE082,stroke:#FF8F00,stroke-width:1px
+    style MON fill:#FFE082,stroke:#FF8F00,stroke-width:1px
+    style CHAOS fill:#A5D6A7,stroke:#2E7D32,stroke-width:1px
+    style BLAME fill:#A5D6A7,stroke:#2E7D32,stroke-width:1px
+    style IMP fill:#A5D6A7,stroke:#2E7D32,stroke-width:1px
 ```
 
 ## 可伸缩性
 
 ### 三种架构模式
 
+#### 共享内存架构
+
+```mermaid
+graph LR
+    CPU1[CPU1] --> RAM[共享内存 RAM]
+    CPU2[CPU2] --> RAM
+    CPU3[CPU3] --> RAM
+    CPU4[CPU4] --> RAM
+
+    style CPU1 fill:#90CAF9,stroke:#1565C0,stroke-width:2px
+    style CPU2 fill:#90CAF9,stroke:#1565C0,stroke-width:2px
+    style CPU3 fill:#90CAF9,stroke:#1565C0,stroke-width:2px
+    style CPU4 fill:#90CAF9,stroke:#1565C0,stroke-width:2px
+    style RAM fill:#FFE082,stroke:#FF8F00,stroke-width:2px
 ```
-┌─────────────────────────────────────────────────────────────────────┐
-│                        共享内存架构                                  │
-├─────────────────────────────────────────────────────────────────────┤
-│     ┌──────┐  ┌──────┐  ┌──────┐  ┌──────┐                         │
-│     │ CPU1 │  │ CPU2 │  │ CPU3 │  │ CPU4 │                         │
-│     └──┬───┘  └──┬───┘  └──┬───┘  └──┬───┘                         │
-│        └─────────┴─────────┴─────────┘                              │
-│                        │                                            │
-│              ┌─────────┴─────────┐                                  │
-│              │    共享内存 RAM    │                                  │
-│              └───────────────────┘                                  │
-└─────────────────────────────────────────────────────────────────────┘
 
-┌─────────────────────────────────────────────────────────────────────┐
-│                        共享磁盘架构                                  │
-├─────────────────────────────────────────────────────────────────────┤
-│     ┌──────┐       ┌──────┐       ┌──────┐                         │
-│     │机器1 │       │机器2 │       │机器3 │                         │
-│     └──┬───┘       └──┬───┘       └──┬───┘                         │
-│        └──────────────┼──────────────┘                              │
-│                       │                                             │
-│              ┌────────┴────────┐                                    │
-│              │   NAS / SAN     │                                    │
-│              └─────────────────┘                                    │
-└─────────────────────────────────────────────────────────────────────┘
+#### 共享磁盘架构
 
-┌─────────────────────────────────────────────────────────────────────┐
-│                        无共享架构                                    │
-├─────────────────────────────────────────────────────────────────────┤
-│     ┌──────────┐   ┌──────────┐   ┌──────────┐                     │
-│     │  机器1   │   │  机器2   │   │  机器3   │                     │
-│     │ CPU+RAM  │   │ CPU+RAM  │   │ CPU+RAM  │                     │
-│     │  +Disk   │   │  +Disk   │   │  +Disk   │                     │
-│     └────┬─────┘   └────┬─────┘   └────┬─────┘                     │
-│          └──────────────┼──────────────┘                            │
-│                    网络通信                                          │
-└─────────────────────────────────────────────────────────────────────┘
+```mermaid
+graph LR
+    M1[机器1] --> STORAGE[NAS / SAN]
+    M2[机器2] --> STORAGE
+    M3[机器3] --> STORAGE
+
+    style M1 fill:#90CAF9,stroke:#1565C0,stroke-width:2px
+    style M2 fill:#90CAF9,stroke:#1565C0,stroke-width:2px
+    style M3 fill:#90CAF9,stroke:#1565C0,stroke-width:2px
+    style STORAGE fill:#A5D6A7,stroke:#2E7D32,stroke-width:2px
+```
+
+#### 无共享架构
+
+```mermaid
+graph LR
+    N1[机器1<br/>CPU+RAM+Disk] -.网络通信.-> N2[机器2<br/>CPU+RAM+Disk]
+    N2 -.网络通信.-> N3[机器3<br/>CPU+RAM+Disk]
+    N3 -.网络通信.-> N1
+
+    style N1 fill:#CE93D8,stroke:#6A1B9A,stroke-width:2px
+    style N2 fill:#CE93D8,stroke:#6A1B9A,stroke-width:2px
+    style N3 fill:#CE93D8,stroke:#6A1B9A,stroke-width:2px
 ```
 
 | 架构 | 特点 | 优势 | 劣势 |
@@ -259,13 +332,22 @@ SLO 定义：
 
 ### 无共享架构的优势
 
-```
-✓ 线性伸缩潜力
-✓ 最佳性价比
-✓ 易于调整资源
-✓ 更大容错能力
-✗ 分布式系统复杂性
-✗ 需要显式数据分片
+```mermaid
+graph LR
+    NSA[无共享架构] --> ADV1[线性伸缩潜力]
+    NSA --> ADV2[最佳性价比]
+    NSA --> ADV3[易于调整资源]
+    NSA --> ADV4[更大容错能力]
+    NSA --> DIS1[分布式系统复杂性]
+    NSA --> DIS2[需要显式数据分片]
+
+    style NSA fill:#CE93D8,stroke:#6A1B9A,stroke-width:2px
+    style ADV1 fill:#A5D6A7,stroke:#2E7D32,stroke-width:2px
+    style ADV2 fill:#A5D6A7,stroke:#2E7D32,stroke-width:2px
+    style ADV3 fill:#A5D6A7,stroke:#2E7D32,stroke-width:2px
+    style ADV4 fill:#A5D6A7,stroke:#2E7D32,stroke-width:2px
+    style DIS1 fill:#FFAB91,stroke:#D84315,stroke-width:2px
+    style DIS2 fill:#FFAB91,stroke:#D84315,stroke-width:2px
 ```
 
 ### 伸缩性原则
@@ -280,11 +362,16 @@ SLO 定义：
 
 ### 三个维度
 
-```
-可维护性
-├── 可运维性（Operability）：易于运维团队保持系统运行
-├── 简单性（Simplicity）：易于新工程师理解系统
-└── 可演化性（Evolvability）：易于对系统进行修改
+```mermaid
+graph LR
+    MAINT[可维护性] --> OPS[可运维性<br/>Operability<br/>易于运维团队保持系统运行]
+    MAINT --> SIMP[简单性<br/>Simplicity<br/>易于新工程师理解系统]
+    MAINT --> EVOL[可演化性<br/>Evolvability<br/>易于对系统进行修改]
+
+    style MAINT fill:#CE93D8,stroke:#6A1B9A,stroke-width:2px
+    style OPS fill:#90CAF9,stroke:#1565C0,stroke-width:2px
+    style SIMP fill:#FFE082,stroke:#FF8F00,stroke-width:2px
+    style EVOL fill:#A5D6A7,stroke:#2E7D32,stroke-width:2px
 ```
 
 ### 可运维性
@@ -328,29 +415,8 @@ SLO 定义：
 - 最小化不可逆性：保持回退能力
 - 敏捷实践：TDD、重构等
 
-## 本章总结
+## 核心理念
 
-```
-非功能性需求
-├── 性能
-│    ├── 响应时间 vs 吞吐量
-│    ├── 百分位数（p50/p95/p99）
-│    └── 尾部延迟放大
-├── 可靠性
-│    ├── 故障 vs 失效
-│    ├── 硬件/软件/人为故障
-│    └── 容错策略
-├── 可伸缩性
-│    ├── 共享内存/共享磁盘/无共享
-│    ├── 垂直 vs 水平扩展
-│    └── 渐进式规划
-└── 可维护性
-     ├── 可运维性
-     ├── 简单性
-     └── 可演化性
-```
-
-**核心理念**：
 - 用百分位数而非平均值衡量性能
 - 构建能容忍故障的系统，而非追求零故障
 - 不要过度设计，单机能解决就不要分布式

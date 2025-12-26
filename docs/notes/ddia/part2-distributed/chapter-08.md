@@ -6,6 +6,70 @@ title: 第8章 事务
 
 > 本章基于 [DDIA 中文翻译](https://ddia.vonng.com/ch8/) 整理
 
+## 章节概览
+
+```mermaid
+graph LR
+    A[事务] --> B[ACID 属性]
+    A --> C[隔离级别]
+    A --> D[并发问题]
+    A --> E[实现可串行化]
+    A --> F[分布式事务]
+
+    B --> B1[原子性: 全有或全无]
+    B --> B2[一致性: 满足约束]
+    B --> B3[隔离性: 并发隔离]
+    B --> B4[持久性: 数据不丢失]
+
+    C --> C1[读未提交: 最弱]
+    C --> C2[读已提交: 防止脏读/脏写]
+    C --> C3[快照隔离: MVCC，防止读偏斜]
+    C --> C4[可串行化: 最强]
+
+    D --> D1[脏读/脏写]
+    D --> D2[读偏斜 不可重复读]
+    D --> D3[丢失更新]
+    D --> D4[写偏斜]
+    D --> D5[幻读]
+
+    E --> E1[串行执行: 简单但吞吐量低]
+    E --> E2[两阶段锁定: 悲观，性能差]
+    E --> E3[SSI: 乐观，性能好]
+
+    F --> F1[两阶段提交 2PC]
+    F --> F2[XA 事务]
+
+    style A fill:#90CAF9,stroke:#1565C0,stroke-width:3px
+    style B fill:#FFE082,stroke:#FF8F00,stroke-width:2px
+    style C fill:#A5D6A7,stroke:#2E7D32,stroke-width:2px
+    style D fill:#FFAB91,stroke:#D84315,stroke-width:2px
+    style E fill:#CE93D8,stroke:#6A1B9A,stroke-width:2px
+    style F fill:#FFE082,stroke:#FF8F00,stroke-width:2px
+
+    style B1 fill:#FFF9C4,stroke:#F57F17,stroke-width:1px
+    style B2 fill:#FFF9C4,stroke:#F57F17,stroke-width:1px
+    style B3 fill:#FFF9C4,stroke:#F57F17,stroke-width:1px
+    style B4 fill:#FFF9C4,stroke:#F57F17,stroke-width:1px
+
+    style C1 fill:#C8E6C9,stroke:#1B5E20,stroke-width:1px
+    style C2 fill:#C8E6C9,stroke:#1B5E20,stroke-width:1px
+    style C3 fill:#C8E6C9,stroke:#1B5E20,stroke-width:1px
+    style C4 fill:#C8E6C9,stroke:#1B5E20,stroke-width:1px
+
+    style D1 fill:#FFCCBC,stroke:#BF360C,stroke-width:1px
+    style D2 fill:#FFCCBC,stroke:#BF360C,stroke-width:1px
+    style D3 fill:#FFCCBC,stroke:#BF360C,stroke-width:1px
+    style D4 fill:#FFCCBC,stroke:#BF360C,stroke-width:1px
+    style D5 fill:#FFCCBC,stroke:#BF360C,stroke-width:1px
+
+    style E1 fill:#E1BEE7,stroke:#4A148C,stroke-width:1px
+    style E2 fill:#E1BEE7,stroke:#4A148C,stroke-width:1px
+    style E3 fill:#E1BEE7,stroke:#4A148C,stroke-width:1px
+
+    style F1 fill:#FFF9C4,stroke:#F57F17,stroke-width:1px
+    style F2 fill:#FFF9C4,stroke:#F57F17,stroke-width:1px
+```
+
 ## 概述
 
 事务是应用程序将多个读写操作组合成一个逻辑单元的方式。事务提供了简化的编程模型，让开发者可以忽略某些潜在的错误场景和并发问题。
@@ -393,71 +457,8 @@ sequenceDiagram
 
 跨异构系统的分布式事务标准，问题较多，现代系统倾向于避免使用。
 
-## 本章总结
+## 核心要点
 
-```mermaid
-graph TD
-    A[事务] --> B[ACID 属性]
-    A --> C[隔离级别]
-    A --> D[并发问题]
-    A --> E[实现可串行化]
-    A --> F[分布式事务]
-
-    B --> B1[原子性: 全有或全无]
-    B --> B2[一致性: 满足约束]
-    B --> B3[隔离性: 并发隔离]
-    B --> B4[持久性: 数据不丢失]
-
-    C --> C1[读未提交: 最弱]
-    C --> C2[读已提交: 防止脏读/脏写]
-    C --> C3[快照隔离: MVCC，防止读偏斜]
-    C --> C4[可串行化: 最强]
-
-    D --> D1[脏读/脏写]
-    D --> D2[读偏斜 不可重复读]
-    D --> D3[丢失更新]
-    D --> D4[写偏斜]
-    D --> D5[幻读]
-
-    E --> E1[串行执行: 简单但吞吐量低]
-    E --> E2[两阶段锁定: 悲观，性能差]
-    E --> E3[SSI: 乐观，性能好]
-
-    F --> F1[两阶段提交 2PC]
-    F --> F2[XA 事务]
-
-    style A fill:#90CAF9,stroke:#1565C0,stroke-width:3px
-    style B fill:#FFE082,stroke:#FF8F00,stroke-width:2px
-    style C fill:#A5D6A7,stroke:#2E7D32,stroke-width:2px
-    style D fill:#FFAB91,stroke:#D84315,stroke-width:2px
-    style E fill:#CE93D8,stroke:#6A1B9A,stroke-width:2px
-    style F fill:#FFE082,stroke:#FF8F00,stroke-width:2px
-
-    style B1 fill:#FFF9C4,stroke:#F57F17,stroke-width:1px
-    style B2 fill:#FFF9C4,stroke:#F57F17,stroke-width:1px
-    style B3 fill:#FFF9C4,stroke:#F57F17,stroke-width:1px
-    style B4 fill:#FFF9C4,stroke:#F57F17,stroke-width:1px
-
-    style C1 fill:#C8E6C9,stroke:#1B5E20,stroke-width:1px
-    style C2 fill:#C8E6C9,stroke:#1B5E20,stroke-width:1px
-    style C3 fill:#C8E6C9,stroke:#1B5E20,stroke-width:1px
-    style C4 fill:#C8E6C9,stroke:#1B5E20,stroke-width:1px
-
-    style D1 fill:#FFCCBC,stroke:#BF360C,stroke-width:1px
-    style D2 fill:#FFCCBC,stroke:#BF360C,stroke-width:1px
-    style D3 fill:#FFCCBC,stroke:#BF360C,stroke-width:1px
-    style D4 fill:#FFCCBC,stroke:#BF360C,stroke-width:1px
-    style D5 fill:#FFCCBC,stroke:#BF360C,stroke-width:1px
-
-    style E1 fill:#E1BEE7,stroke:#4A148C,stroke-width:1px
-    style E2 fill:#E1BEE7,stroke:#4A148C,stroke-width:1px
-    style E3 fill:#E1BEE7,stroke:#4A148C,stroke-width:1px
-
-    style F1 fill:#FFF9C4,stroke:#F57F17,stroke-width:1px
-    style F2 fill:#FFF9C4,stroke:#F57F17,stroke-width:1px
-```
-
-**核心要点**：
 - 事务简化了并发和故障处理的编程模型
 - 隔离级别是性能和正确性的权衡
 - 可串行化是最强保证，但有性能代价
